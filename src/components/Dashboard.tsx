@@ -11,12 +11,17 @@ import {
   Activity,
   Calendar,
   Shield,
-  Settings
+  Settings,
+  MapPin,
+  Battery
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import FleetGrid from '@/components/fleet/FleetGrid';
+import MetricsGrid from '@/components/analytics/MetricsGrid';
+import LiveStatusBoard from '@/components/realtime/LiveStatusBoard';
 
 const Dashboard: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -26,38 +31,78 @@ const Dashboard: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const kpiData = [
+  const metricsData = [
     {
+      id: 'fleet-availability',
       title: "Fleet Availability",
-      value: "94.2%",
-      change: "+2.1%",
-      trend: "up",
+      value: 94.2,
+      unit: "%",
+      change: 2.1,
+      changeLabel: "vs last hour",
+      trend: "up" as const,
       icon: Train,
-      color: "success"
+      category: "operations" as const,
+      isPositiveTrend: true
     },
     {
-      title: "AI Prediction Accuracy",
-      value: "97.8%",
-      change: "+0.8%", 
-      trend: "up",
+      id: 'ai-accuracy',
+      title: "AI Prediction Accuracy", 
+      value: 97.8,
+      unit: "%",
+      change: 0.8,
+      changeLabel: "vs last hour",
+      trend: "up" as const,
       icon: Brain,
-      color: "primary"
+      category: "performance" as const,
+      isPositiveTrend: true
     },
     {
+      id: 'schedule-efficiency',
       title: "Schedule Efficiency",
-      value: "91.5%",
-      change: "-1.2%",
-      trend: "down", 
+      value: 91.5,
+      unit: "%", 
+      change: -1.2,
+      changeLabel: "vs last hour",
+      trend: "down" as const,
       icon: Clock,
-      color: "warning"
+      category: "efficiency" as const,
+      isPositiveTrend: true
     },
     {
+      id: 'staff-utilization',
       title: "Staff Utilization",
-      value: "88.3%",
-      change: "+3.4%",
-      trend: "up",
+      value: 88.3,
+      unit: "%",
+      change: 3.4,
+      changeLabel: "vs last hour", 
+      trend: "up" as const,
       icon: Users,
-      color: "success"
+      category: "operations" as const,
+      isPositiveTrend: true
+    },
+    {
+      id: 'energy-efficiency',
+      title: "Energy Efficiency",
+      value: 89.7,
+      unit: "%",
+      change: 1.8,
+      changeLabel: "vs last hour",
+      trend: "up" as const,
+      icon: Battery,
+      category: "efficiency" as const,
+      isPositiveTrend: true
+    },
+    {
+      id: 'incident-rate',
+      title: "Incident Rate",
+      value: 0.03,
+      unit: "/hour",
+      change: -15.2,
+      changeLabel: "vs last week",
+      trend: "down" as const,
+      icon: AlertTriangle,
+      category: "safety" as const,
+      isPositiveTrend: false
     }
   ];
 
@@ -82,12 +127,81 @@ const Dashboard: React.FC = () => {
     }
   ];
 
-  const fleetStatusData = [
-    { id: "KMX-101", status: "operational", location: "Aluva Station", batteryLevel: 87, nextMaintenance: "2 days" },
-    { id: "KMX-102", status: "maintenance", location: "Depot", batteryLevel: 0, nextMaintenance: "In progress" },
-    { id: "KMX-103", status: "operational", location: "Kalamassery", batteryLevel: 92, nextMaintenance: "5 days" },
-    { id: "KMX-104", status: "warning", location: "Edapally", batteryLevel: 34, nextMaintenance: "Today" },
-    { id: "KMX-105", status: "operational", location: "MG Road", batteryLevel: 78, nextMaintenance: "3 days" }
+  const fleetData = [
+    { 
+      id: "KMX-101", 
+      status: "operational" as const, 
+      location: "Aluva Station", 
+      batteryLevel: 87, 
+      nextMaintenance: "2 days",
+      passengerLoad: 45,
+      speed: 65,
+      lastUpdate: "12:34:56",
+      route: "Aluva - Kacheripady",
+      fitnessExpiry: "2024-12-15"
+    },
+    { 
+      id: "KMX-102", 
+      status: "maintenance" as const, 
+      location: "Depot", 
+      batteryLevel: 0, 
+      nextMaintenance: "In progress",
+      passengerLoad: 0,
+      speed: 0,
+      lastUpdate: "11:22:34",
+      route: "Maintenance Bay",
+      fitnessExpiry: "2024-11-20",
+      anomalies: ["Brake system check", "Battery replacement"]
+    },
+    { 
+      id: "KMX-103", 
+      status: "operational" as const, 
+      location: "Kalamassery", 
+      batteryLevel: 92, 
+      nextMaintenance: "5 days",
+      passengerLoad: 78,
+      speed: 55,
+      lastUpdate: "12:35:12",
+      route: "Kalamassery - Edapally",
+      fitnessExpiry: "2024-12-30"
+    },
+    { 
+      id: "KMX-104", 
+      status: "warning" as const, 
+      location: "Edapally", 
+      batteryLevel: 34, 
+      nextMaintenance: "Today",
+      passengerLoad: 23,
+      speed: 40,
+      lastUpdate: "12:33:45",
+      route: "Edapally - MG Road",
+      fitnessExpiry: "2024-10-15",
+      anomalies: ["Low battery warning", "Fitness certificate expires soon"]
+    },
+    { 
+      id: "KMX-105", 
+      status: "operational" as const, 
+      location: "MG Road", 
+      batteryLevel: 78, 
+      nextMaintenance: "3 days",
+      passengerLoad: 89,
+      speed: 50,
+      lastUpdate: "12:35:23",
+      route: "MG Road - Kacheripady",
+      fitnessExpiry: "2024-11-10"
+    },
+    {
+      id: "KMX-106",
+      status: "charging" as const,
+      location: "Muttom Depot",
+      batteryLevel: 23,
+      nextMaintenance: "7 days",
+      passengerLoad: 0,
+      speed: 0,
+      lastUpdate: "12:30:15",
+      route: "Charging Station",
+      fitnessExpiry: "2024-12-05"
+    }
   ];
 
   const getStatusColor = (status: string) => {
@@ -107,6 +221,11 @@ const Dashboard: React.FC = () => {
       case 'info': return 'secondary';
       default: return 'secondary';
     }
+  };
+
+  const handleTrainSelect = (trainId: string) => {
+    console.log('Selected train:', trainId);
+    // Navigate to detailed train view
   };
 
   return (
@@ -133,129 +252,94 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Key Performance Indicators */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {kpiData.map((kpi, index) => (
-          <Card key={index} className="glass-card border-primary/20 hologram-glow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {kpi.title}
-              </CardTitle>
-              <kpi.icon className="w-4 h-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-glow mb-1">{kpi.value}</div>
-              <div className="flex items-center gap-2">
-                <Badge 
-                  variant={kpi.trend === 'up' ? 'default' : 'secondary'} 
-                  className={`text-xs ${kpi.trend === 'up' ? 'text-success' : 'text-warning'}`}
-                >
-                  <TrendingUp className="w-3 h-3 mr-1" />
-                  {kpi.change}
-                </Badge>
-                <span className="text-xs text-muted-foreground">vs last hour</span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Enhanced Metrics Grid */}
+      <MetricsGrid metrics={metricsData} />
+
+      {/* Live Status Board */}
+      <LiveStatusBoard />
+
+      {/* Fleet Management Section */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-glow">Fleet Overview</h2>
+          <Badge variant="outline" className="text-primary border-primary">
+            {fleetData.length} Active Trains
+          </Badge>
+        </div>
+        <FleetGrid trains={fleetData} onTrainSelect={handleTrainSelect} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Fleet Status Overview */}
-        <div className="lg:col-span-2">
-          <Card className="glass-card border-primary/20 h-full">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-glow">Real-time Fleet Status</CardTitle>
-                  <CardDescription>Live monitoring of all KMRL trains</CardDescription>
+      {/* Alerts & Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="glass-card border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-glow flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+              Active Alerts
+            </CardTitle>
+            <CardDescription>Critical notifications requiring attention</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {alertsData.map((alert, index) => (
+                <div key={index} className="glass-card p-3 rounded-lg border border-primary/10">
+                  <div className="flex items-start gap-3">
+                    <alert.icon className={`w-4 h-4 mt-0.5 ${
+                      alert.type === 'critical' ? 'text-destructive' :
+                      alert.type === 'warning' ? 'text-warning' : 'text-success'
+                    }`} />
+                    <div className="flex-1">
+                      <p className="text-sm text-foreground mb-1">{alert.message}</p>
+                      <p className="text-xs text-muted-foreground">{alert.time}</p>
+                    </div>
+                  </div>
                 </div>
-                <Badge variant="outline" className="text-primary border-primary">
-                  5 Active Trains
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {fleetStatusData.map((train) => (
-                  <div key={train.id} className="glass-card p-4 rounded-lg border border-primary/10">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <Train className="w-5 h-5 text-primary" />
-                        <div>
-                          <h4 className="font-semibold text-foreground">{train.id}</h4>
-                          <p className="text-sm text-muted-foreground">{train.location}</p>
-                        </div>
-                      </div>
-                      <Badge variant={getStatusColor(train.status) as any}>
-                        {train.status}
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="text-xs text-muted-foreground">Battery Level</label>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Progress value={train.batteryLevel} className="flex-1" />
-                          <span className="text-sm font-medium">{train.batteryLevel}%</span>
-                        </div>
-                      </div>
-                      <div>
-                        <label className="text-xs text-muted-foreground">Next Maintenance</label>
-                        <p className="text-sm font-medium mt-1">{train.nextMaintenance}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-4 pt-4 border-t border-primary/10">
-                <Button variant="outline" className="w-full">
-                  <Train className="w-4 h-4 mr-2" />
-                  View Detailed Fleet Status
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+              ))}
+            </div>
+            
+            <div className="mt-4 pt-4 border-t border-primary/10">
+              <Button variant="outline" size="sm" className="w-full">
+                View All Alerts
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-        {/* Alerts & Notifications */}
-        <div>
-          <Card className="glass-card border-primary/20 h-full">
-            <CardHeader>
-              <CardTitle className="text-glow flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-warning" />
-                System Alerts
-              </CardTitle>
-              <CardDescription>Critical notifications and warnings</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {alertsData.map((alert, index) => (
-                  <div key={index} className="glass-card p-3 rounded-lg border border-primary/10">
-                    <div className="flex items-start gap-3">
-                      <alert.icon className={`w-4 h-4 mt-0.5 ${
-                        alert.type === 'critical' ? 'text-destructive' :
-                        alert.type === 'warning' ? 'text-warning' : 'text-success'
-                      }`} />
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground mb-1">{alert.message}</p>
-                        <p className="text-xs text-muted-foreground">{alert.time}</p>
-                      </div>
-                    </div>
+        <Card className="glass-card border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-glow">AI Recommendations</CardTitle>
+            <CardDescription>Smart insights from the KMRL AI system</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="glass-card p-4 rounded-lg border border-primary/10">
+                <div className="flex items-start gap-3">
+                  <Brain className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-foreground mb-1">Optimize Schedule</h4>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Reduce peak hour wait times by 12% with schedule adjustment
+                    </p>
+                    <Button variant="neural" size="sm">Implement</Button>
                   </div>
-                ))}
+                </div>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-primary/10">
-                <Button variant="outline" size="sm" className="w-full">
-                  View All Alerts
-                </Button>
+              <div className="glass-card p-4 rounded-lg border border-primary/10">
+                <div className="flex items-start gap-3">
+                  <Zap className="w-5 h-5 text-success mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-foreground mb-1">Energy Savings</h4>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Potential 8% energy reduction through route optimization
+                    </p>
+                    <Button variant="hologram" size="sm">Review Plan</Button>
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Actions */}

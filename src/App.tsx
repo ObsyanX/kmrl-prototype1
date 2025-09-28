@@ -14,6 +14,7 @@ import FleetStatus from "./pages/FleetStatus";
 import Simulator from "./pages/Simulator";
 import FitnessCertificates from "./pages/FitnessCertificates";
 import Maintenance from "./pages/Maintenance";
+import StaffAvailability from "./pages/StaffAvailability";
 import BrandingSLA from "./pages/BrandingSLA";
 import Performance from "./pages/Performance";
 import MileageBalancing from "./pages/MileageBalancing";
@@ -83,11 +84,13 @@ const App = () => {
                 <Route path="/simulator" element={<Simulator />} />
                 <Route path="/fleet-status" element={<FleetStatus />} />
                 <Route path="/fitness-certificates" element={<FitnessCertificates />} />
+                <Route path="/maintenance" element={<Maintenance />} />
                 <Route path="/job-card-status" element={<JobCardStatus />} />
                 <Route path="/branding-sla" element={<BrandingSLA />} />
                 <Route path="/mileage-balancing" element={<MileageBalancing />} />
                 <Route path="/cleaning-detailing" element={<CleaningDetailing />} />
                 <Route path="/stabling-geometry" element={<StablingGeometry />} />
+                <Route path="/staff-availability" element={<StaffAvailability />} />
                 <Route path="/reports-analytics" element={<ReportsAnalytics />} />
                 <Route path="/algorithm-rules" element={<AlgorithmRules />} />
                 <Route path="/user-management" element={<UserManagement />} />
