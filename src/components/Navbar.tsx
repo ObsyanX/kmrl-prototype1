@@ -47,21 +47,22 @@ const Navbar: React.FC<NavbarProps> = ({ userRole, onLogout }) => {
       title: "Data Management", 
       items: [
         { name: "Fitness Certificates", path: "/fitness-certificates", icon: Shield, roles: ['operator', 'manager', 'admin'] },
-        { name: "Maintenance Schedule", path: "/maintenance", icon: Cog, roles: ['operator', 'manager', 'admin'] },
-        { name: "Branding SLA", path: "/branding-sla", icon: FileText, roles: ['manager', 'admin'] },
-        { name: "Performance Metrics", path: "/performance", icon: Activity, roles: ['operator', 'manager', 'admin', 'analyst'] },
-        { name: "Staff Availability", path: "/staff-availability", icon: Users, roles: ['operator', 'manager', 'admin'] },
-        { name: "Incident Reports", path: "/incidents", icon: AlertTriangle, roles: ['operator', 'manager', 'admin'] },
+        { name: "Job-Card Status", path: "/job-card-status", icon: Cog, roles: ['operator', 'manager', 'admin'] },
+        { name: "Branding Priorities", path: "/branding-sla", icon: FileText, roles: ['manager', 'admin'] },
+        { name: "Mileage Balancing", path: "/mileage-balancing", icon: Activity, roles: ['operator', 'manager', 'admin', 'analyst'] },
+        { name: "Cleaning & Detailing", path: "/cleaning-detailing", icon: Users, roles: ['operator', 'manager', 'admin'] },
+        { name: "Stabling Geometry", path: "/stabling-geometry", icon: AlertTriangle, roles: ['operator', 'manager', 'admin'] },
       ]
     },
     {
       title: "System Administration",
       items: [
+        { name: "Reports & Analytics", path: "/reports-analytics", icon: BarChart3, roles: ['admin', 'analyst', 'manager'] },
         { name: "Algorithm & Rules", path: "/algorithm-rules", icon: Brain, roles: ['admin', 'analyst'] },
-        { name: "Data Sources", path: "/data-sources", icon: Database, roles: ['admin'] },
-        { name: "User Management", path: "/user-management", icon: Users, roles: ['admin'] },
-        { name: "Post-Op Feedback", path: "/feedback", icon: FileText, roles: ['operator', 'manager', 'admin'] },
-        { name: "Help & Support", path: "/support", icon: HelpCircle, roles: ['operator', 'manager', 'admin', 'analyst'] },
+        { name: "User & Role Management", path: "/user-management", icon: Users, roles: ['admin'] },
+        { name: "Post-Operation Feedback", path: "/feedback", icon: FileText, roles: ['operator', 'manager', 'admin'] },
+        { name: "Help & Support Center", path: "/support", icon: HelpCircle, roles: ['operator', 'manager', 'admin', 'analyst'] },
+        { name: "Data Integration", path: "/data-sources", icon: Database, roles: ['admin'] },
         { name: "Audit Trail", path: "/audit-trail", icon: Shield, roles: ['manager', 'admin'] },
       ]
     }

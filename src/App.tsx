@@ -15,8 +15,11 @@ import FitnessCertificates from "./pages/FitnessCertificates";
 import Maintenance from "./pages/Maintenance";
 import BrandingSLA from "./pages/BrandingSLA";
 import Performance from "./pages/Performance";
-import StaffAvailability from "./pages/StaffAvailability";
-import Incidents from "./pages/Incidents";
+import MileageBalancing from "./pages/MileageBalancing";
+import CleaningDetailing from "./pages/CleaningDetailing";
+import StablingGeometry from "./pages/StablingGeometry";
+import ReportsAnalytics from "./pages/ReportsAnalytics";
+import JobCardStatus from "./pages/JobCardStatus";
 import AlgorithmRules from "./pages/AlgorithmRules";
 import DataSources from "./pages/DataSources";
 import UserManagement from "./pages/UserManagement";
@@ -70,16 +73,17 @@ const App = () => {
                 <Route path="/simulator" element={<Simulator />} />
                 <Route path="/fleet-status" element={<FleetStatus />} />
                 <Route path="/fitness-certificates" element={<FitnessCertificates />} />
-                <Route path="/maintenance" element={<Maintenance />} />
+                <Route path="/job-card-status" element={<JobCardStatus />} />
                 <Route path="/branding-sla" element={<BrandingSLA />} />
-                <Route path="/performance" element={<Performance />} />
-                <Route path="/staff-availability" element={<StaffAvailability />} />
-                <Route path="/incidents" element={<Incidents />} />
+                <Route path="/mileage-balancing" element={<MileageBalancing />} />
+                <Route path="/cleaning-detailing" element={<CleaningDetailing />} />
+                <Route path="/stabling-geometry" element={<StablingGeometry />} />
+                <Route path="/reports-analytics" element={<ReportsAnalytics />} />
                 <Route path="/algorithm-rules" element={<AlgorithmRules />} />
-                <Route path="/data-sources" element={<DataSources />} />
                 <Route path="/user-management" element={<UserManagement />} />
                 <Route path="/feedback" element={<Feedback />} />
                 <Route path="/support" element={<Support />} />
+                <Route path="/data-sources" element={<DataSources />} />
                 <Route path="/audit-trail" element={<AuditTrail />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
