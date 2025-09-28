@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { EyeIcon, EyeOffIcon, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { EyeIcon, EyeOffIcon, AlertTriangle, CheckCircle2, Clock, Settings } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
@@ -13,6 +13,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { loginSchema, accessRequestSchema, registrationSchema, type LoginFormData, type AccessRequestFormData, type RegistrationFormData } from "@/lib/validations";
 import { useAuth } from "@/hooks/useAuth";
+import { useDeveloperTools } from "@/hooks/useDeveloperTools";
+import { DeveloperPanel } from "@/components/DeveloperPanel";
 
 interface LoginPageProps {
   onLogin: (role: string) => void;
@@ -21,7 +23,9 @@ interface LoginPageProps {
 const LoginPage = ({ onLogin }: LoginPageProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
+  const [showDeveloperPanel, setShowDeveloperPanel] = useState(false);
   const { signIn, signUp, loading } = useAuth();
+  const { isDevelopment, debugLog } = useDeveloperTools();
 
   // Login form
   const loginForm = useForm<LoginFormData>({
@@ -58,9 +62,13 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
   });
 
   const handleLogin = async (data: LoginFormData) => {
+    debugLog('Login attempt', { email: data.email });
     const { error } = await signIn(data.email, data.password);
     if (!error) {
+      debugLog('Login successful');
       onLogin("supervisor"); // Default role, will be determined by database
+    } else {
+      debugLog('Login failed', { error: error.message });
     }
   };
 
@@ -100,6 +108,19 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
               <Clock className="w-3 h-3 text-blue-300" />
               <span className="text-blue-300">Real-time Data</span>
             </div>
+            {isDevelopment && (
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowDeveloperPanel(true)}
+                  className="text-yellow-300 hover:text-yellow-200 p-1"
+                >
+                  <Settings className="w-3 h-3" />
+                  <span className="ml-1 text-xs">DEV</span>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -128,12 +149,12 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
                         <FormItem>
                           <FormLabel className="text-white">KMRL Email</FormLabel>
                           <FormControl>
-                            <Input
-                              {...field}
-                              type="email"
-                              placeholder="your.name@kmrl.org"
-                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
-                            />
+                          <Input
+                            {...field}
+                            type="email"
+                            placeholder={isDevelopment ? "your.name@kmrl.org or @gmail.com" : "your.name@kmrl.org"}
+                            className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                          />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -476,6 +497,12 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
           <p className="mt-1">Secure • Auditable • AI-Driven</p>
         </div>
       </div>
+      
+      {/* Developer Panel */}
+      <DeveloperPanel 
+        isOpen={showDeveloperPanel} 
+        onClose={() => setShowDeveloperPanel(false)} 
+      />
     </div>
   );
 };

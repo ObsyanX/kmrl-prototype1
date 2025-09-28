@@ -7,15 +7,25 @@ export const employeeIdSchema = z
   .min(10, "Employee ID must be 10 characters")
   .max(10, "Employee ID must be 10 characters");
 
-// Login form validation
+// Login form validation with support for multiple domains
 export const loginSchema = z.object({
   email: z
     .string()
     .email("Please enter a valid email address")
-    .endsWith("@kmrl.org", "Email must be a valid KMRL email address"),
+    .refine((email) => {
+      // Support both KMRL and Gmail for development
+      return email.endsWith("@kmrl.org") || email.endsWith("@gmail.com");
+    }, "Email must be a valid KMRL email address or Gmail address for development"),
   password: z
     .string()
     .min(6, "Password must be at least 6 characters"),
+});
+
+// Developer login bypass
+export const developerLoginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
+  isDeveloper: z.boolean().optional(),
 });
 
 // Access request form validation
@@ -32,7 +42,9 @@ export const accessRequestSchema = z.object({
   email: z
     .string()
     .email("Please enter a valid email address")
-    .endsWith("@kmrl.org", "Email must be a valid KMRL email address"),
+    .refine((email) => {
+      return email.endsWith("@kmrl.org") || email.endsWith("@gmail.com");
+    }, "Email must be a valid KMRL email address or Gmail address for development"),
   justification: z
     .string()
     .min(50, "Justification must be at least 50 characters")
@@ -44,7 +56,9 @@ export const registrationSchema = z.object({
   email: z
     .string()
     .email("Please enter a valid email address")
-    .endsWith("@kmrl.org", "Email must be a valid KMRL email address"),
+    .refine((email) => {
+      return email.endsWith("@kmrl.org") || email.endsWith("@gmail.com");
+    }, "Email must be a valid KMRL email address or Gmail address for development"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")

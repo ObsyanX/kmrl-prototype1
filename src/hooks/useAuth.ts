@@ -91,9 +91,20 @@ export const useAuth = () => {
       });
 
       if (error) {
+        let errorMessage = error.message;
+        
+        // Handle specific error cases
+        if (error.message.includes('Email not confirmed')) {
+          errorMessage = "Please check your email and click the confirmation link. For development, email confirmation can be disabled in Supabase settings.";
+        } else if (error.message.includes('Invalid login credentials')) {
+          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+        } else if (error.message.includes('Too many requests')) {
+          errorMessage = "Too many login attempts. Please wait a few minutes before trying again.";
+        }
+        
         toast({
           title: "Authentication Error",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive"
         });
         return { error };
@@ -107,6 +118,11 @@ export const useAuth = () => {
       return { error: null };
     } catch (error) {
       console.error('Sign in error:', error);
+      toast({
+        title: "Login Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
       return { error };
     }
   };
@@ -129,22 +145,38 @@ export const useAuth = () => {
       });
 
       if (error) {
+        let errorMessage = error.message;
+        
+        // Handle specific error cases
+        if (error.message.includes('User already registered')) {
+          errorMessage = "An account with this email already exists. Please try logging in instead.";
+        } else if (error.message.includes('Password should be at least')) {
+          errorMessage = "Password must be at least 6 characters long.";
+        } else if (error.message.includes('Unable to validate email address')) {
+          errorMessage = "Please enter a valid email address.";
+        }
+        
         toast({
           title: "Registration Error",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive"
         });
         return { error };
       }
 
       toast({
-        title: "Registration Successful",
-        description: "Please check your email to confirm your account.",
+        title: "Registration Successful", 
+        description: "Please check your email to confirm your account. For development, email confirmation can be disabled in Supabase settings.",
       });
 
       return { error: null };
     } catch (error) {
       console.error('Sign up error:', error);
+      toast({
+        title: "Registration Failed",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive"
+      });
       return { error };
     }
   };
