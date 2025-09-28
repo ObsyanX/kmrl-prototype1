@@ -22,6 +22,7 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -46,6 +47,29 @@ export default {
         card: {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
+        },
+        // KMRL Advanced Palette
+        kmrl: {
+          green: "hsl(var(--kmrl-green))",
+          "green-glow": "hsl(var(--kmrl-green-glow))",
+        },
+        hologram: {
+          blue: "hsl(var(--hologram-blue))",
+          green: "hsl(var(--hologram-green))",
+          purple: "hsl(var(--neural-purple))",
+          orange: "hsl(var(--data-orange))",
+        },
+        glass: {
+          bg: "hsl(var(--glass-bg))",
+          border: "hsl(var(--glass-border))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -84,6 +108,28 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite alternate",
+        "neural-pulse": "neural-pulse 3s ease-in-out infinite",
+        "data-flow": "data-flow 2s linear infinite",
+        "float": "float 3s ease-in-out infinite",
+        "scan": "scan 2s linear infinite",
+      },
+      fontFamily: {
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Consolas', 'Liberation Mono', 'monospace'],
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-glass': 'var(--gradient-glass)', 
+        'gradient-neural': 'var(--gradient-neural)',
+        'gradient-cockpit': 'var(--gradient-cockpit)',
+      },
+      boxShadow: {
+        'glow': 'var(--shadow-glow)',
+        'glass': 'var(--shadow-glass)',
+        'neural': 'var(--shadow-neural)',
+      },
+      backdropBlur: {
+        'glass': '20px',
       },
     },
   },
