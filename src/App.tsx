@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
+import { useAuth } from "@/hooks/useAuth";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Dashboard from "./components/Dashboard";
@@ -31,22 +32,31 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState<string>('operator');
+  const { user, loading, signOut } = useAuth();
 
-  const handleLogin = (credentials: { username: string; password: string; role: string }) => {
-    // In a real application, this would validate against a backend
-    console.log('Login attempt:', credentials);
-    setUserRole(credentials.role);
-    setIsAuthenticated(true);
+  const handleLogin = (role: string) => {
+    // Authentication is handled by useAuth hook
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    setUserRole('operator');
+    signOut();
   };
 
-  if (!isAuthenticated) {
+  if (loading) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center">
+            <div className="text-white text-xl">Loading...</div>
+          </div>
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  if (!user) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
@@ -65,7 +75,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-background flex flex-col">
-            <Navbar userRole={userRole} onLogout={handleLogout} />
+            <Navbar userRole="supervisor" onLogout={handleLogout} />
             <main className="flex-1">
               <Routes>
                 <Route path="/" element={<Dashboard />} />

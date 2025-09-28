@@ -1,276 +1,479 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, Shield, Zap, Brain, AlertTriangle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import heroImage from '@/assets/hero-dashboard.jpg';
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { EyeIcon, EyeOffIcon, AlertTriangle, CheckCircle2, Clock } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { loginSchema, accessRequestSchema, registrationSchema, type LoginFormData, type AccessRequestFormData, type RegistrationFormData } from "@/lib/validations";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LoginPageProps {
-  onLogin: (credentials: { username: string; password: string; role: string }) => void;
+  onLogin: (role: string) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
+const LoginPage = ({ onLogin }: LoginPageProps) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [credentials, setCredentials] = useState({
-    username: '',
-    password: '',
-    role: 'operator'
-  });
-  const [accessRequest, setAccessRequest] = useState({
-    name: '',
-    employeeId: '',
-    department: '',
-    requestedRole: 'operator',
-    justification: ''
+  const [activeTab, setActiveTab] = useState("login");
+  const { signIn, signUp, loading } = useAuth();
+
+  // Login form
+  const loginForm = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    onLogin(credentials);
+  // Access request form
+  const accessForm = useForm<AccessRequestFormData>({
+    resolver: zodResolver(accessRequestSchema),
+    defaultValues: {
+      full_name: "",
+      employee_id: "",
+      department: "",
+      email: "",
+      justification: "",
+    },
+  });
+
+  // Registration form
+  const registrationForm = useForm<RegistrationFormData>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirm_password: "",
+      employee_id: "",
+      full_name: "",
+      department: "",
+    },
+  });
+
+  const handleLogin = async (data: LoginFormData) => {
+    const { error } = await signIn(data.email, data.password);
+    if (!error) {
+      onLogin("supervisor"); // Default role, will be determined by database
+    }
   };
 
-  const handleAccessRequest = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle access request submission
-    console.log('Access request submitted:', accessRequest);
+  const handleRegistration = async (data: RegistrationFormData) => {
+    const { error } = await signUp(data.email, data.password, {
+      employee_id: data.employee_id,
+      full_name: data.full_name,
+      department: data.department,
+    });
+    
+    if (!error) {
+      setActiveTab("login");
+    }
+  };
+
+  const handleAccessRequest = (data: AccessRequestFormData) => {
+    console.log("Access request submitted:", data);
+    // This would typically send to an admin for approval
+    accessForm.reset();
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Background Hero Image with Overlay */}
-      <div className="absolute inset-0">
-        <img 
-          src={heroImage} 
-          alt="KMRL Control Dashboard" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/80 to-background/90" />
-        <div className="absolute inset-0 bg-gradient-neural opacity-20" />
-      </div>
-
-      {/* Floating Data Streams */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 bg-gradient-to-t from-transparent via-primary to-transparent opacity-60 data-stream"
-            style={{
-              left: `${15 + i * 15}%`,
-              height: '100vh',
-              animationDelay: `${i * 0.5}s`
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="relative z-10 flex items-center justify-center min-h-screen p-6">
-        <div className="w-full max-w-md">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-bold text-white">KMRL AI Platform</h1>
+          <p className="text-blue-200">Train Induction Planning & Scheduling</p>
           
-          {/* KMRL Header */}
-          <div className="text-center mb-8 space-y-4">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="p-3 glass-card rounded-xl hologram-glow">
-                <Brain className="w-8 h-8 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-glow">KMRL AI Platform</h1>
-                <p className="text-sm text-muted-foreground">Train Induction Planning & Scheduling</p>
-              </div>
+          {/* System Status */}
+          <div className="flex items-center justify-center space-x-6 text-sm">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-green-300">All Systems Online</span>
             </div>
-            
-            <div className="glass-card p-4 rounded-lg">
-              <div className="flex items-center justify-center gap-6 text-xs">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
-                  <span className="text-success">Systems Online</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Zap className="w-3 h-3 text-warning" />
-                  <span className="text-warning">Real-time Data</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Shield className="w-3 h-3 text-primary" />
-                  <span className="text-primary">Secure Access</span>
-                </div>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Clock className="w-3 h-3 text-blue-300" />
+              <span className="text-blue-300">Real-time Data</span>
             </div>
           </div>
+        </div>
 
-          {/* Login/Access Request Tabs */}
-          <Card className="glass-card border-primary/20 hologram-glow">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-center text-glow">Digital Control Tower Access</CardTitle>
-              <CardDescription className="text-center">
-                Mission-critical authentication for operations supervisors
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <Tabs defaultValue="login" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 glass mb-6">
-                  <TabsTrigger value="login" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                    Secure Login
-                  </TabsTrigger>
-                  <TabsTrigger value="request" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
-                    Request Access
-                  </TabsTrigger>
-                </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="login">Secure Login</TabsTrigger>
+            <TabsTrigger value="register">Register</TabsTrigger>
+            <TabsTrigger value="access">Request Access</TabsTrigger>
+          </TabsList>
 
-                <TabsContent value="login">
-                  <form onSubmit={handleLogin} className="space-y-6">
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="username" className="text-foreground">Username</Label>
-                        <Input
-                          id="username"
-                          type="text"
-                          placeholder="Enter your KMRL username"
-                          value={credentials.username}
-                          onChange={(e) => setCredentials({...credentials, username: e.target.value})}
-                          className="glass-card border-primary/30 focus:border-primary mt-2"
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="password" className="text-foreground">Password</Label>
-                        <div className="relative mt-2">
-                          <Input
-                            id="password"
-                            type={showPassword ? "text" : "password"}
-                            placeholder="Enter your secure password"
-                            value={credentials.password}
-                            onChange={(e) => setCredentials({...credentials, password: e.target.value})}
-                            className="glass-card border-primary/30 focus:border-primary pr-10"
-                            required
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="role" className="text-foreground">Role</Label>
-                        <select
-                          id="role"
-                          value={credentials.role}
-                          onChange={(e) => setCredentials({...credentials, role: e.target.value})}
-                          className="w-full mt-2 glass-card border border-primary/30 focus:border-primary rounded-md px-3 py-2 text-foreground bg-transparent"
-                        >
-                          <option value="operator" className="bg-background">Operations Supervisor</option>
-                          <option value="admin" className="bg-background">System Administrator</option>
-                          <option value="manager" className="bg-background">Operations Manager</option>
-                          <option value="analyst" className="bg-background">Data Analyst</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <Button type="submit" className="w-full" variant="neural">
-                      <Shield className="w-4 h-4 mr-2" />
-                      Initialize Control Tower Access
+          <TabsContent value="login">
+            <Card>
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-white">Secure Login</CardTitle>
+                <CardDescription className="text-gray-300">
+                  Enter your KMRL credentials to access the platform
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...loginForm}>
+                  <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
+                    <FormField
+                      control={loginForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">KMRL Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="your.name@kmrl.org"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={loginForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                {...field}
+                                type={showPassword ? "text" : "password"}
+                                placeholder="Enter your password"
+                                className="bg-white/10 border-white/20 text-white placeholder-gray-400 pr-10"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent text-gray-400 hover:text-white"
+                                onClick={() => setShowPassword(!showPassword)}
+                              >
+                                {showPassword ? (
+                                  <EyeOffIcon className="h-4 w-4" />
+                                ) : (
+                                  <EyeIcon className="h-4 w-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold py-3"
+                      disabled={loading}
+                    >
+                      {loading ? "Signing in..." : "Access KMRL AI Platform"}
                     </Button>
                   </form>
-                </TabsContent>
+                </Form>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-                <TabsContent value="request">
-                  <form onSubmit={handleAccessRequest} className="space-y-4">
-                    <div className="glass-card p-4 rounded-lg border border-warning/30 mb-4">
-                      <div className="flex items-start gap-3">
-                        <AlertTriangle className="w-5 h-5 text-warning mt-0.5" />
+          <TabsContent value="register">
+            <Card>
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-white">Register Account</CardTitle>
+                <CardDescription className="text-gray-300">
+                  Create a new KMRL account (requires admin approval)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...registrationForm}>
+                  <form onSubmit={registrationForm.handleSubmit(handleRegistration)} className="space-y-4">
+                    <FormField
+                      control={registrationForm.control}
+                      name="full_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Full Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Enter your full name"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={registrationForm.control}
+                      name="employee_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Employee ID</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="KMRL123456"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={registrationForm.control}
+                      name="department"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Department</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                <SelectValue placeholder="Select your department" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="operations">Operations</SelectItem>
+                              <SelectItem value="rolling-stock">Rolling-Stock</SelectItem>
+                              <SelectItem value="maintenance">Maintenance</SelectItem>
+                              <SelectItem value="commercial">Commercial</SelectItem>
+                              <SelectItem value="telecom">Telecom</SelectItem>
+                              <SelectItem value="signalling">Signalling</SelectItem>
+                              <SelectItem value="it">Information Technology</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={registrationForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">KMRL Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="your.name@kmrl.org"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={registrationForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="password"
+                              placeholder="Create a strong password"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={registrationForm.control}
+                      name="confirm_password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Confirm Password</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="password"
+                              placeholder="Confirm your password"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button 
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold py-3"
+                      disabled={loading}
+                    >
+                      {loading ? "Creating Account..." : "Create Account"}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="access">
+            <Card>
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl font-bold text-white">Request Access</CardTitle>
+                <CardDescription className="text-gray-300">
+                  Submit a request for platform access approval
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...accessForm}>
+                  <form onSubmit={accessForm.handleSubmit(handleAccessRequest)} className="space-y-4">
+                    <FormField
+                      control={accessForm.control}
+                      name="full_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Full Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Enter your full name"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={accessForm.control}
+                      name="employee_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Employee ID</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="KMRL123456"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={accessForm.control}
+                      name="department"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Department</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                                <SelectValue placeholder="Select your department" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="operations">Operations</SelectItem>
+                              <SelectItem value="rolling-stock">Rolling-Stock</SelectItem>
+                              <SelectItem value="maintenance">Maintenance</SelectItem>
+                              <SelectItem value="commercial">Commercial</SelectItem>
+                              <SelectItem value="telecom">Telecom</SelectItem>
+                              <SelectItem value="signalling">Signalling</SelectItem>
+                              <SelectItem value="it">Information Technology</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={accessForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">KMRL Email</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              type="email"
+                              placeholder="your.name@kmrl.org"
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={accessForm.control}
+                      name="justification"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-white">Justification for Access</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              placeholder="Please provide a detailed reason for needing access to this platform, including your role and responsibilities."
+                              className="bg-white/10 border-white/20 text-white placeholder-gray-400 min-h-[100px]"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="bg-yellow-500/20 border border-yellow-500/40 rounded-lg p-4">
+                      <div className="flex items-start space-x-3">
+                        <AlertTriangle className="h-5 w-5 text-yellow-400 mt-0.5" />
                         <div>
-                          <h4 className="font-semibold text-warning">Access Request Protocol</h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            All access requests require approval from the System Administrator and Operations Manager.
+                          <p className="text-yellow-200 font-medium text-sm">Access Request Protocol</p>
+                          <p className="text-yellow-300 text-xs mt-1">
+                            All access requests are reviewed by the system administrator. 
+                            Please allow 2-3 business days for approval. You will be contacted 
+                            via your official KMRL email once your request is processed.
                           </p>
                         </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input
-                          id="name"
-                          value={accessRequest.name}
-                          onChange={(e) => setAccessRequest({...accessRequest, name: e.target.value})}
-                          className="glass-card border-primary/30 focus:border-primary mt-1"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="employeeId">Employee ID</Label>
-                        <Input
-                          id="employeeId"
-                          value={accessRequest.employeeId}
-                          onChange={(e) => setAccessRequest({...accessRequest, employeeId: e.target.value})}
-                          className="glass-card border-primary/30 focus:border-primary mt-1"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="department">Department</Label>
-                      <Input
-                        id="department"
-                        value={accessRequest.department}
-                        onChange={(e) => setAccessRequest({...accessRequest, department: e.target.value})}
-                        className="glass-card border-primary/30 focus:border-primary mt-1"
-                        placeholder="e.g., Operations, Maintenance, Safety"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="requestedRole">Requested Access Level</Label>
-                      <select
-                        id="requestedRole"
-                        value={accessRequest.requestedRole}
-                        onChange={(e) => setAccessRequest({...accessRequest, requestedRole: e.target.value})}
-                        className="w-full mt-1 glass-card border border-primary/30 focus:border-primary rounded-md px-3 py-2 text-foreground bg-transparent"
-                      >
-                        <option value="operator" className="bg-background">Operations Supervisor</option>
-                        <option value="analyst" className="bg-background">Data Analyst</option>
-                        <option value="manager" className="bg-background">Operations Manager</option>
-                        <option value="admin" className="bg-background">System Administrator</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="justification">Business Justification</Label>
-                      <textarea
-                        id="justification"
-                        value={accessRequest.justification}
-                        onChange={(e) => setAccessRequest({...accessRequest, justification: e.target.value})}
-                        className="w-full mt-1 glass-card border border-primary/30 focus:border-primary rounded-md px-3 py-2 text-foreground bg-transparent h-20"
-                        placeholder="Explain why you need access to this system..."
-                        required
-                      />
-                    </div>
-
-                    <Button type="submit" className="w-full" variant="cockpit">
-                      Submit Access Request
+                    
+                    <Button 
+                      type="submit"
+                      className="w-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 text-white font-semibold py-3"
+                      disabled={loading}
+                    >
+                      {loading ? "Submitting..." : "Submit Access Request"}
                     </Button>
                   </form>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
+                </Form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
-          {/* Footer Info */}
-          <div className="text-center mt-6 text-xs text-muted-foreground">
-            <p>© 2024 Kochi Metro Rail Limited. All rights reserved.</p>
-            <p className="mt-1">Secure • Auditable • AI-Driven</p>
-          </div>
+        {/* Footer */}
+        <div className="text-center text-sm text-gray-400">
+          <p>© 2025 Kochi Metro Rail Limited. All Rights Reserved.</p>
+          <p className="mt-1">Secure • Auditable • AI-Driven</p>
         </div>
       </div>
     </div>
