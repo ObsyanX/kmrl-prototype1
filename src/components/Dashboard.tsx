@@ -109,13 +109,13 @@ const Dashboard: React.FC = () => {
   const alertsData = [
     {
       type: "critical",
-      message: "Train KMX-203 requires immediate maintenance check",
+      message: "Train YAMUNA requires immediate maintenance check",
       time: "2 min ago",
       icon: AlertTriangle
     },
     {
       type: "warning", 
-      message: "Fitness certificate for KMX-105 expires in 3 days",
+      message: "Fitness certificate for ARUTH expires in 3 days",
       time: "15 min ago",
       icon: Clock
     },
@@ -141,7 +141,7 @@ const Dashboard: React.FC = () => {
       fitnessExpiry: "2024-12-15"
     },
     { 
-      id: "KMX-102", 
+      id: "TAPTI", 
       status: "maintenance" as const, 
       location: "Depot", 
       batteryLevel: 0, 
@@ -154,7 +154,7 @@ const Dashboard: React.FC = () => {
       anomalies: ["Brake system check", "Battery replacement"]
     },
     { 
-      id: "KMX-103", 
+      id: "NILA", 
       status: "operational" as const, 
       location: "Kalamassery", 
       batteryLevel: 92, 
@@ -166,7 +166,7 @@ const Dashboard: React.FC = () => {
       fitnessExpiry: "2024-12-30"
     },
     { 
-      id: "KMX-104", 
+      id: "SARAYU", 
       status: "warning" as const, 
       location: "Edapally", 
       batteryLevel: 34, 
@@ -179,7 +179,7 @@ const Dashboard: React.FC = () => {
       anomalies: ["Low battery warning", "Fitness certificate expires soon"]
     },
     { 
-      id: "KMX-105", 
+      id: "ARUTH",
       status: "operational" as const, 
       location: "MG Road", 
       batteryLevel: 78, 
@@ -191,7 +191,7 @@ const Dashboard: React.FC = () => {
       fitnessExpiry: "2024-11-10"
     },
     {
-      id: "KMX-106",
+      id: "VAIGAI",
       status: "charging" as const,
       location: "Muttom Depot",
       batteryLevel: 23,
