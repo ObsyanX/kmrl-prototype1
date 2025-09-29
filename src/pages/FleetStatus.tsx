@@ -26,7 +26,7 @@ const FleetStatus: React.FC = () => {
       issues: []
     },
     {
-      id: "TAPI", 
+      id: "TAPTI", 
       status: "maintenance",
       location: "Main Depot",
       batteryLevel: 0,
