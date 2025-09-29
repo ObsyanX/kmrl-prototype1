@@ -13,26 +13,26 @@ const StablingGeometry: React.FC = () => {
   
   const trainPositions = {
     current: [
-      { id: 'T01', track: 'A1', position: { x: 20, y: 30 }, status: 'parked' },
-      { id: 'T02', track: 'A2', position: { x: 20, y: 50 }, status: 'parked' },
-      { id: 'T03', track: 'B1', position: { x: 60, y: 30 }, status: 'cleaning' },
-      { id: 'T04', track: 'B2', position: { x: 60, y: 50 }, status: 'parked' },
-      { id: 'T05', track: 'C1', position: { x: 100, y: 30 }, status: 'maintenance' },
+      { id: 'KRISHNA', track: 'A1', position: { x: 20, y: 30 }, status: 'parked' },
+      { id: 'TAPTI', track: 'A2', position: { x: 20, y: 50 }, status: 'parked' },
+      { id: 'NILA', track: 'B1', position: { x: 60, y: 30 }, status: 'cleaning' },
+      { id: 'SARAYU', track: 'B2', position: { x: 60, y: 50 }, status: 'parked' },
+      { id: 'ARUTH', track: 'C1', position: { x: 100, y: 30 }, status: 'maintenance' },
     ],
     proposed: [
-      { id: 'T01', track: 'A1', position: { x: 20, y: 30 }, status: 'parked', moved: false },
-      { id: 'T02', track: 'B1', position: { x: 60, y: 30 }, status: 'parked', moved: true },
-      { id: 'T03', track: 'A2', position: { x: 20, y: 50 }, status: 'parked', moved: true },
-      { id: 'T04', track: 'C1', position: { x: 100, y: 30 }, status: 'parked', moved: true },
-      { id: 'T05', track: 'B2', position: { x: 60, y: 50 }, status: 'parked', moved: true },
+      { id: 'KRISHNA', track: 'A1', position: { x: 20, y: 30 }, status: 'parked', moved: false },
+      { id: 'TAPTI', track: 'B1', position: { x: 60, y: 30 }, status: 'parked', moved: true },
+      { id: 'NILA', track: 'A2', position: { x: 20, y: 50 }, status: 'parked', moved: true },
+      { id: 'SARAYU', track: 'C1', position: { x: 100, y: 30 }, status: 'parked', moved: true },
+      { id: 'ARUTH', track: 'B2', position: { x: 60, y: 50 }, status: 'parked', moved: true },
     ]
   };
 
   const shuntingMoves = [
-    { from: 'T02', fromTrack: 'A2', toTrack: 'B1', complexity: 'Simple', duration: '5 min' },
-    { from: 'T03', fromTrack: 'B1', toTrack: 'A2', complexity: 'Medium', duration: '8 min' },
-    { from: 'T04', fromTrack: 'B2', toTrack: 'C1', complexity: 'Simple', duration: '6 min' },
-    { from: 'T05', fromTrack: 'C1', toTrack: 'B2', complexity: 'Complex', duration: '12 min' },
+    { from: 'TAPTI', fromTrack: 'A2', toTrack: 'B1', complexity: 'Simple', duration: '5 min' },
+    { from: 'NILA', fromTrack: 'B1', toTrack: 'A2', complexity: 'Medium', duration: '8 min' },
+    { from: 'SARAYU', fromTrack: 'B2', toTrack: 'C1', complexity: 'Simple', duration: '6 min' },
+    { from: 'ARUTH', fromTrack: 'C1', toTrack: 'B2', complexity: 'Complex', duration: '12 min' },
   ];
 
   const getStatusColor = (status: string) => {
