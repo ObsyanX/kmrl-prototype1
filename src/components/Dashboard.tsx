@@ -129,7 +129,7 @@ const Dashboard: React.FC = () => {
 
   const fleetData = [
     { 
-      id: "KMX-101", 
+      id: "KRISHNA", 
       status: "operational" as const, 
       location: "Aluva Station", 
       batteryLevel: 87, 
