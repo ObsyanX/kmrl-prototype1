@@ -11,7 +11,7 @@ const FleetStatus: React.FC = () => {
 
   const fleetData = [
     {
-      id: "KMX-101",
+      id: "KRISHNA",
       status: "operational",
       location: "Aluva Station",
       batteryLevel: 87,
@@ -26,7 +26,7 @@ const FleetStatus: React.FC = () => {
       issues: []
     },
     {
-      id: "KMX-102", 
+      id: "TAPI", 
       status: "maintenance",
       location: "Main Depot",
       batteryLevel: 0,
@@ -41,7 +41,7 @@ const FleetStatus: React.FC = () => {
       issues: ["Brake system calibration", "Battery replacement"]
     },
     {
-      id: "KMX-103",
+      id: "NILA",
       status: "operational", 
       location: "Kalamassery Station",
       batteryLevel: 92,
@@ -56,7 +56,7 @@ const FleetStatus: React.FC = () => {
       issues: []
     },
     {
-      id: "KMX-104",
+      id: "SARAYU",
       status: "warning",
       location: "Edapally Station", 
       batteryLevel: 34,
@@ -71,7 +71,7 @@ const FleetStatus: React.FC = () => {
       issues: ["Low battery warning", "Fitness certificate expiring soon"]
     },
     {
-      id: "KMX-105",
+      id: "ARUTH",
       status: "operational",
       location: "MG Road Station",
       batteryLevel: 78,
