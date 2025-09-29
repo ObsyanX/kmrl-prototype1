@@ -40,7 +40,7 @@ export const DeveloperPanel = ({ isOpen, onClose }: DeveloperPanelProps) => {
             </Button>
           </div>
           <CardDescription className="text-gray-300">
-            Development utilities for KMRL AI Platform
+            Development utilities for AGAMI Platform
           </CardDescription>
         </CardHeader>
         
