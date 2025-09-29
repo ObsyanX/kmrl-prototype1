@@ -10,7 +10,7 @@ const InductionPlan: React.FC = () => {
   
   const aiRecommendations = [
     {
-      trainId: "KMX-101",
+      trainId: "KRISHNA",
       shift: "Night Shift (22:00-06:00)",
       priority: "High",
       confidence: 94,
@@ -19,7 +19,7 @@ const InductionPlan: React.FC = () => {
       crew: ["Operator A. Kumar", "Technician R. Nair"]
     },
     {
-      trainId: "KMX-103", 
+      trainId: "TAPTI", 
       shift: "Early Morning (06:00-10:00)",
       priority: "Medium",
       confidence: 87,
@@ -28,7 +28,7 @@ const InductionPlan: React.FC = () => {
       crew: ["Operator S. Pillai", "Technician M. Jose"]
     },
     {
-      trainId: "KMX-105",
+      trainId: "NILA",
       shift: "Late Night (02:00-06:00)", 
       priority: "Low",
       confidence: 78,
