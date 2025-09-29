@@ -89,8 +89,8 @@ const Navbar: React.FC<NavbarProps> = ({ userRole, onLogout }) => {
                 <Brain className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-lg font-bold text-glow">KMRL AI Platform</h1>
-                <p className="text-xs text-muted-foreground">Digital Control Tower</p>
+                <h1 className="text-lg font-bold text-glow">AGAMI</h1>
+                <p className="text-xs text-muted-foreground"> AI-driven Governance for Automated Metro Induction</p>
               </div>
             </div>
           </div>
