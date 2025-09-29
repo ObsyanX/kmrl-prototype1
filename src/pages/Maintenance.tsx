@@ -9,7 +9,7 @@ const Maintenance: React.FC = () => {
   const [maintenanceTasks] = useState([
     {
       id: 'MNT-001',
-      trainId: 'KMX-101',
+      trainId: 'KRISHNA',
       type: 'routine' as const,
       title: 'Monthly Safety Inspection',
       description: 'Comprehensive safety check including brakes, doors, and communication systems',
@@ -24,7 +24,7 @@ const Maintenance: React.FC = () => {
     },
     {
       id: 'MNT-002',
-      trainId: 'KMX-102',
+      trainId: 'TAPTI',
       type: 'corrective' as const,
       title: 'Battery Replacement',
       description: 'Replace degraded battery pack affecting performance',
@@ -39,7 +39,7 @@ const Maintenance: React.FC = () => {
     },
     {
       id: 'MNT-003',
-      trainId: 'KMX-104',
+      trainId: 'SARAYU',
       type: 'emergency' as const,
       title: 'Door Mechanism Repair',
       description: 'Emergency repair for malfunctioning passenger door',
@@ -54,7 +54,7 @@ const Maintenance: React.FC = () => {
     },
     {
       id: 'MNT-004',
-      trainId: 'KMX-103',
+      trainId: 'NILA',
       type: 'preventive' as const,
       title: 'Air Conditioning Service',
       description: 'Preventive maintenance for HVAC system',
@@ -69,7 +69,7 @@ const Maintenance: React.FC = () => {
     },
     {
       id: 'MNT-005',
-      trainId: 'KMX-105',
+      trainId: 'ARUTH',
       type: 'routine' as const,
       title: 'Wheel Set Inspection',
       description: 'Routine inspection and maintenance of wheel sets',
