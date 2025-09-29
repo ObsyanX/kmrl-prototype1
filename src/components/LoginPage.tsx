@@ -95,8 +95,8 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
       <div className="w-full max-w-md space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-white">KMRL AI Platform</h1>
-          <p className="text-blue-200">Train Induction Planning & Scheduling</p>
+          <h1 className="text-4xl font-bold text-white">AGAMI</h1>
+          <p className="text-blue-200">AI-driven Governance for Automated Metro Induction</p>
           
           {/* System Status */}
           <div className="flex items-center justify-center space-x-6 text-sm">
@@ -136,7 +136,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl font-bold text-white">Secure Login</CardTitle>
                 <CardDescription className="text-gray-300">
-                  Enter your KMRL credentials to access the platform
+                  Enter your AGAMI credentials to access the platform
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -147,7 +147,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">KMRL Email</FormLabel>
+                          <FormLabel className="text-white">AGAMI Email</FormLabel>
                           <FormControl>
                           <Input
                             {...field}
@@ -200,7 +200,7 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
                       className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white font-semibold py-3"
                       disabled={loading}
                     >
-                      {loading ? "Signing in..." : "Access KMRL AI Platform"}
+                      {loading ? "Signing in..." : "Access AGAMI platform"}
                     </Button>
                   </form>
                 </Form>
@@ -431,12 +431,12 @@ const LoginPage = ({ onLogin }: LoginPageProps) => {
                       name="email"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-white">KMRL Email</FormLabel>
+                          <FormLabel className="text-white">AGAMI Email</FormLabel>
                           <FormControl>
                             <Input
                               {...field}
                               type="email"
-                              placeholder="your.name@kmrl.org"
+                              placeholder="your.name@kmrl.org or your.name@gmail.com"
                               className="bg-white/10 border-white/20 text-white placeholder-gray-400"
                             />
                           </FormControl>
