@@ -11,11 +11,11 @@ const MileageBalancing: React.FC = () => {
   const [alertThreshold, setAlertThreshold] = useState([15]);
   
   const fleetData = [
-    { id: 'T01', mileage: 45200, variance: 8.2, status: 'normal', components: { bogies: 42000, brakes: 38500, hvac: 44800 } },
-    { id: 'T02', mileage: 52800, variance: 22.1, status: 'over', components: { bogies: 51200, brakes: 47300, hvac: 52100 } },
-    { id: 'T03', mileage: 38900, variance: -18.5, status: 'under', components: { bogies: 37800, brakes: 35200, hvac: 38400 } },
-    { id: 'T04', mileage: 47600, variance: 4.5, status: 'normal', components: { bogies: 46800, brakes: 44200, hvac: 47200 } },
-    { id: 'T05', mileage: 41300, variance: -12.3, status: 'under', components: { bogies: 40500, brakes: 38900, hvac: 40800 } },
+    { id: 'KRISHNA', mileage: 45200, variance: 8.2, status: 'normal', components: { bogies: 42000, brakes: 38500, hvac: 44800 } },
+    { id: 'TAPTI', mileage: 52800, variance: 22.1, status: 'over', components: { bogies: 51200, brakes: 47300, hvac: 52100 } },
+    { id: 'NILA', mileage: 38900, variance: -18.5, status: 'under', components: { bogies: 37800, brakes: 35200, hvac: 38400 } },
+    { id: 'SARAYU', mileage: 47600, variance: 4.5, status: 'normal', components: { bogies: 46800, brakes: 44200, hvac: 47200 } },
+    { id: 'ARUTH', mileage: 41300, variance: -12.3, status: 'under', components: { bogies: 40500, brakes: 38900, hvac: 40800 } },
   ];
   
   const fleetAverage = 45160;
