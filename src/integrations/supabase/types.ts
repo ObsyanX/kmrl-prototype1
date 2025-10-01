@@ -53,6 +53,148 @@ export type Database = {
         }
         Relationships: []
       }
+      branding_contracts: {
+        Row: {
+          assigned_trainsets: string[] | null
+          client_name: string
+          contract_end: string
+          contract_start: string
+          created_at: string
+          id: string
+          priority_level: number | null
+          requirements: Json | null
+          revenue: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_trainsets?: string[] | null
+          client_name: string
+          contract_end: string
+          contract_start: string
+          created_at?: string
+          id: string
+          priority_level?: number | null
+          requirements?: Json | null
+          revenue?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_trainsets?: string[] | null
+          client_name?: string
+          contract_end?: string
+          contract_start?: string
+          created_at?: string
+          id?: string
+          priority_level?: number | null
+          requirements?: Json | null
+          revenue?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      decision_conflicts: {
+        Row: {
+          affected_resources: Json
+          conflict_type: string
+          created_at: string
+          description: string | null
+          id: string
+          optimization_id: string | null
+          resolution_strategy: string | null
+          resolved: boolean | null
+          resolved_at: string | null
+          severity: string
+        }
+        Insert: {
+          affected_resources: Json
+          conflict_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          optimization_id?: string | null
+          resolution_strategy?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity: string
+        }
+        Update: {
+          affected_resources?: Json
+          conflict_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          optimization_id?: string | null
+          resolution_strategy?: string | null
+          resolved?: boolean | null
+          resolved_at?: string | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "decision_conflicts_optimization_id_fkey"
+            columns: ["optimization_id"]
+            isOneToOne: false
+            referencedRelation: "optimization_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fitness_certificates: {
+        Row: {
+          certificate_number: string | null
+          certificate_type: string
+          created_at: string
+          expiry_date: string
+          id: string
+          inspection_details: Json | null
+          issue_date: string
+          issuing_authority: string | null
+          renewal_reminder_sent: boolean | null
+          status: Database["public"]["Enums"]["certificate_status"]
+          trainset_id: string
+          updated_at: string
+        }
+        Insert: {
+          certificate_number?: string | null
+          certificate_type: string
+          created_at?: string
+          expiry_date: string
+          id: string
+          inspection_details?: Json | null
+          issue_date: string
+          issuing_authority?: string | null
+          renewal_reminder_sent?: boolean | null
+          status?: Database["public"]["Enums"]["certificate_status"]
+          trainset_id: string
+          updated_at?: string
+        }
+        Update: {
+          certificate_number?: string | null
+          certificate_type?: string
+          created_at?: string
+          expiry_date?: string
+          id?: string
+          inspection_details?: Json | null
+          issue_date?: string
+          issuing_authority?: string | null
+          renewal_reminder_sent?: boolean | null
+          status?: Database["public"]["Enums"]["certificate_status"]
+          trainset_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fitness_certificates_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           created_at: string
@@ -65,6 +207,154 @@ export type Database = {
         Update: {
           created_at?: string
           id?: number
+        }
+        Relationships: []
+      }
+      maintenance_jobs: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          assigned_staff: string[] | null
+          completion_notes: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          estimated_duration: number | null
+          id: string
+          job_type: string
+          maximo_job_id: string | null
+          priority: Database["public"]["Enums"]["job_priority"]
+          requirements: Json | null
+          scheduled_end: string | null
+          scheduled_start: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          trainset_id: string
+          updated_at: string
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          assigned_staff?: string[] | null
+          completion_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id: string
+          job_type: string
+          maximo_job_id?: string | null
+          priority?: Database["public"]["Enums"]["job_priority"]
+          requirements?: Json | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          status?: Database["public"]["Enums"]["job_status"]
+          trainset_id: string
+          updated_at?: string
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          assigned_staff?: string[] | null
+          completion_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          id?: string
+          job_type?: string
+          maximo_job_id?: string | null
+          priority?: Database["public"]["Enums"]["job_priority"]
+          requirements?: Json | null
+          scheduled_end?: string | null
+          scheduled_start?: string | null
+          status?: Database["public"]["Enums"]["job_status"]
+          trainset_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_jobs_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mileage_records: {
+        Row: {
+          created_at: string
+          daily_mileage: number
+          date: string
+          id: string
+          route_details: Json | null
+          trainset_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_mileage: number
+          date: string
+          id?: string
+          route_details?: Json | null
+          trainset_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_mileage?: number
+          date?: string
+          id?: string
+          route_details?: Json | null
+          trainset_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mileage_records_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      optimization_history: {
+        Row: {
+          algorithm_version: string
+          applied: boolean | null
+          confidence_score: number | null
+          created_at: string
+          created_by: string | null
+          execution_time_ms: number | null
+          execution_timestamp: string
+          feedback_score: number | null
+          id: string
+          input_parameters: Json
+          recommendations: Json
+        }
+        Insert: {
+          algorithm_version: string
+          applied?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          execution_time_ms?: number | null
+          execution_timestamp?: string
+          feedback_score?: number | null
+          id?: string
+          input_parameters: Json
+          recommendations: Json
+        }
+        Update: {
+          algorithm_version?: string
+          applied?: boolean | null
+          confidence_score?: number | null
+          created_at?: string
+          created_by?: string | null
+          execution_time_ms?: number | null
+          execution_timestamp?: string
+          feedback_score?: number | null
+          id?: string
+          input_parameters?: Json
+          recommendations?: Json
         }
         Relationships: []
       }
@@ -98,18 +388,179 @@ export type Database = {
         }
         Relationships: []
       }
-      trainsets: {
+      stabling_positions: {
         Row: {
+          adjacent_positions: string[] | null
+          capacity: number | null
           created_at: string
-          id: number
+          current_occupant: string | null
+          depot_section: string
+          facilities: string[] | null
+          geometry: Json | null
+          id: string
+          position_name: string
+          position_type: string
+          status: Database["public"]["Enums"]["position_status"]
+          track_number: number | null
+          updated_at: string
         }
         Insert: {
+          adjacent_positions?: string[] | null
+          capacity?: number | null
           created_at?: string
-          id?: number
+          current_occupant?: string | null
+          depot_section: string
+          facilities?: string[] | null
+          geometry?: Json | null
+          id: string
+          position_name: string
+          position_type: string
+          status?: Database["public"]["Enums"]["position_status"]
+          track_number?: number | null
+          updated_at?: string
         }
         Update: {
+          adjacent_positions?: string[] | null
+          capacity?: number | null
           created_at?: string
-          id?: number
+          current_occupant?: string | null
+          depot_section?: string
+          facilities?: string[] | null
+          geometry?: Json | null
+          id?: string
+          position_name?: string
+          position_type?: string
+          status?: Database["public"]["Enums"]["position_status"]
+          track_number?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stabling_positions_current_occupant_fkey"
+            columns: ["current_occupant"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_schedules: {
+        Row: {
+          assigned_job_id: string | null
+          assigned_trainset_id: string | null
+          created_at: string
+          date: string
+          end_time: string
+          id: string
+          role: Database["public"]["Enums"]["staff_role"]
+          shift: Database["public"]["Enums"]["shift_type"]
+          staff_id: string
+          staff_name: string
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_job_id?: string | null
+          assigned_trainset_id?: string | null
+          created_at?: string
+          date: string
+          end_time: string
+          id: string
+          role: Database["public"]["Enums"]["staff_role"]
+          shift: Database["public"]["Enums"]["shift_type"]
+          staff_id: string
+          staff_name: string
+          start_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_job_id?: string | null
+          assigned_trainset_id?: string | null
+          created_at?: string
+          date?: string
+          end_time?: string
+          id?: string
+          role?: Database["public"]["Enums"]["staff_role"]
+          shift?: Database["public"]["Enums"]["shift_type"]
+          staff_id?: string
+          staff_name?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_schedules_assigned_job_id_fkey"
+            columns: ["assigned_job_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_schedules_assigned_trainset_id_fkey"
+            columns: ["assigned_trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trainsets: {
+        Row: {
+          battery_level: number | null
+          branding_contract_id: string | null
+          created_at: string
+          current_location: string | null
+          current_stabling_position: string | null
+          fitness_certificate_expiry: string | null
+          id: string
+          last_cleaning_date: string | null
+          last_maintenance_date: string | null
+          metadata: Json | null
+          name: string
+          next_maintenance_date: string | null
+          operational_hours: number | null
+          status: Database["public"]["Enums"]["train_status"]
+          total_mileage: number | null
+          updated_at: string
+        }
+        Insert: {
+          battery_level?: number | null
+          branding_contract_id?: string | null
+          created_at?: string
+          current_location?: string | null
+          current_stabling_position?: string | null
+          fitness_certificate_expiry?: string | null
+          id: string
+          last_cleaning_date?: string | null
+          last_maintenance_date?: string | null
+          metadata?: Json | null
+          name: string
+          next_maintenance_date?: string | null
+          operational_hours?: number | null
+          status?: Database["public"]["Enums"]["train_status"]
+          total_mileage?: number | null
+          updated_at?: string
+        }
+        Update: {
+          battery_level?: number | null
+          branding_contract_id?: string | null
+          created_at?: string
+          current_location?: string | null
+          current_stabling_position?: string | null
+          fitness_certificate_expiry?: string | null
+          id?: string
+          last_cleaning_date?: string | null
+          last_maintenance_date?: string | null
+          metadata?: Json | null
+          name?: string
+          next_maintenance_date?: string | null
+          operational_hours?: number | null
+          status?: Database["public"]["Enums"]["train_status"]
+          total_mileage?: number | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -165,6 +616,36 @@ export type Database = {
         | "telecom_admin"
         | "rolling_stock_admin"
         | "auditor"
+      certificate_status:
+        | "valid"
+        | "expiring_soon"
+        | "expired"
+        | "pending_renewal"
+      job_priority: "critical" | "high" | "medium" | "low"
+      job_status:
+        | "pending"
+        | "scheduled"
+        | "in_progress"
+        | "completed"
+        | "delayed"
+        | "cancelled"
+      position_status: "available" | "occupied" | "maintenance" | "reserved"
+      shift_type: "morning" | "afternoon" | "night"
+      staff_role:
+        | "driver"
+        | "conductor"
+        | "maintenance"
+        | "supervisor"
+        | "security"
+        | "cleaner"
+      train_status:
+        | "operational"
+        | "maintenance"
+        | "cleaning"
+        | "branding"
+        | "awaiting_fitness"
+        | "out_of_service"
+        | "standby"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -300,6 +781,40 @@ export const Constants = {
         "telecom_admin",
         "rolling_stock_admin",
         "auditor",
+      ],
+      certificate_status: [
+        "valid",
+        "expiring_soon",
+        "expired",
+        "pending_renewal",
+      ],
+      job_priority: ["critical", "high", "medium", "low"],
+      job_status: [
+        "pending",
+        "scheduled",
+        "in_progress",
+        "completed",
+        "delayed",
+        "cancelled",
+      ],
+      position_status: ["available", "occupied", "maintenance", "reserved"],
+      shift_type: ["morning", "afternoon", "night"],
+      staff_role: [
+        "driver",
+        "conductor",
+        "maintenance",
+        "supervisor",
+        "security",
+        "cleaner",
+      ],
+      train_status: [
+        "operational",
+        "maintenance",
+        "cleaning",
+        "branding",
+        "awaiting_fitness",
+        "out_of_service",
+        "standby",
       ],
     },
   },
