@@ -1,1 +1,13 @@
 project_id = "gnywoydgedpvolivzqwj"
+
+[functions.optimization-engine]
+verify_jwt = true
+
+[functions.ai-recommendation-generator]
+verify_jwt = true
+
+[functions.fitness-certificate-validator]
+verify_jwt = true
+
+[functions.train-induction-planner]
+verify_jwt = true
