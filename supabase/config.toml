@@ -1,13 +1,25 @@
 project_id = "gnywoydgedpvolivzqwj"
 
 [functions.optimization-engine]
-verify_jwt = true
+verify_jwt = false
 
 [functions.ai-recommendation-generator]
-verify_jwt = true
+verify_jwt = false
 
 [functions.fitness-certificate-validator]
-verify_jwt = true
+verify_jwt = false
 
 [functions.train-induction-planner]
-verify_jwt = true
+verify_jwt = false
+
+[functions.weather-predictor]
+verify_jwt = false
+
+[functions.demand-forecaster]
+verify_jwt = false
+
+[functions.pattern-learner]
+verify_jwt = false
+
+[functions.performance-tracker]
+verify_jwt = false

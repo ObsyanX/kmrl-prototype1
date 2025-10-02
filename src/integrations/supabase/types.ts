@@ -95,6 +95,45 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_events: {
+        Row: {
+          created_at: string | null
+          event_date: string
+          event_name: string
+          event_type: string | null
+          expected_demand_factor: number | null
+          fleet_adjustment_required: boolean | null
+          id: string
+          notes: string | null
+          ridership_multiplier: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_date: string
+          event_name: string
+          event_type?: string | null
+          expected_demand_factor?: number | null
+          fleet_adjustment_required?: boolean | null
+          id?: string
+          notes?: string | null
+          ridership_multiplier?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_date?: string
+          event_name?: string
+          event_type?: string | null
+          expected_demand_factor?: number | null
+          fleet_adjustment_required?: boolean | null
+          id?: string
+          notes?: string | null
+          ridership_multiplier?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       decision_conflicts: {
         Row: {
           affected_resources: Json
@@ -141,6 +180,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      depot_congestion: {
+        Row: {
+          active_shunting_moves: number | null
+          available_tracks: number | null
+          congestion_score: number | null
+          created_at: string | null
+          depot_section: string
+          estimated_delay_minutes: number | null
+          id: string
+          sensor_data: Json | null
+          timestamp: string
+          traffic_flow: string | null
+        }
+        Insert: {
+          active_shunting_moves?: number | null
+          available_tracks?: number | null
+          congestion_score?: number | null
+          created_at?: string | null
+          depot_section: string
+          estimated_delay_minutes?: number | null
+          id?: string
+          sensor_data?: Json | null
+          timestamp?: string
+          traffic_flow?: string | null
+        }
+        Update: {
+          active_shunting_moves?: number | null
+          available_tracks?: number | null
+          congestion_score?: number | null
+          created_at?: string | null
+          depot_section?: string
+          estimated_delay_minutes?: number | null
+          id?: string
+          sensor_data?: Json | null
+          timestamp?: string
+          traffic_flow?: string | null
+        }
+        Relationships: []
       }
       fitness_certificates: {
         Row: {
@@ -316,6 +394,77 @@ export type Database = {
           },
         ]
       }
+      operation_outcomes: {
+        Row: {
+          actual_conflicts: number | null
+          actual_duration_minutes: number | null
+          actual_induction_time: string | null
+          congestion_impact_actual: number | null
+          congestion_impact_predicted: number | null
+          created_at: string | null
+          deviation_minutes: number | null
+          id: string
+          learning_data: Json | null
+          optimization_id: string | null
+          planned_induction_time: string | null
+          predicted_conflicts: number | null
+          predicted_duration_minutes: number | null
+          punctuality_achieved: boolean | null
+          success_score: number | null
+          trainset_id: string
+          weather_impact_actual: number | null
+          weather_impact_predicted: number | null
+        }
+        Insert: {
+          actual_conflicts?: number | null
+          actual_duration_minutes?: number | null
+          actual_induction_time?: string | null
+          congestion_impact_actual?: number | null
+          congestion_impact_predicted?: number | null
+          created_at?: string | null
+          deviation_minutes?: number | null
+          id?: string
+          learning_data?: Json | null
+          optimization_id?: string | null
+          planned_induction_time?: string | null
+          predicted_conflicts?: number | null
+          predicted_duration_minutes?: number | null
+          punctuality_achieved?: boolean | null
+          success_score?: number | null
+          trainset_id: string
+          weather_impact_actual?: number | null
+          weather_impact_predicted?: number | null
+        }
+        Update: {
+          actual_conflicts?: number | null
+          actual_duration_minutes?: number | null
+          actual_induction_time?: string | null
+          congestion_impact_actual?: number | null
+          congestion_impact_predicted?: number | null
+          created_at?: string | null
+          deviation_minutes?: number | null
+          id?: string
+          learning_data?: Json | null
+          optimization_id?: string | null
+          planned_induction_time?: string | null
+          predicted_conflicts?: number | null
+          predicted_duration_minutes?: number | null
+          punctuality_achieved?: boolean | null
+          success_score?: number | null
+          trainset_id?: string
+          weather_impact_actual?: number | null
+          weather_impact_predicted?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operation_outcomes_optimization_id_fkey"
+            columns: ["optimization_id"]
+            isOneToOne: false
+            referencedRelation: "optimization_history"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       optimization_history: {
         Row: {
           algorithm_version: string
@@ -355,6 +504,63 @@ export type Database = {
           id?: string
           input_parameters?: Json
           recommendations?: Json
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          accuracy_percentage: number | null
+          accurate_predictions: number | null
+          average_deviation_minutes: number | null
+          created_at: string | null
+          demand_prediction_accuracy: number | null
+          detailed_metrics: Json | null
+          id: string
+          maintenance_reduction_rate: number | null
+          metric_date: string
+          metric_type: string | null
+          ml_model_version: string | null
+          punctuality_rate: number | null
+          total_conflicts_actual: number | null
+          total_conflicts_predicted: number | null
+          total_predictions: number | null
+          weather_prediction_accuracy: number | null
+        }
+        Insert: {
+          accuracy_percentage?: number | null
+          accurate_predictions?: number | null
+          average_deviation_minutes?: number | null
+          created_at?: string | null
+          demand_prediction_accuracy?: number | null
+          detailed_metrics?: Json | null
+          id?: string
+          maintenance_reduction_rate?: number | null
+          metric_date: string
+          metric_type?: string | null
+          ml_model_version?: string | null
+          punctuality_rate?: number | null
+          total_conflicts_actual?: number | null
+          total_conflicts_predicted?: number | null
+          total_predictions?: number | null
+          weather_prediction_accuracy?: number | null
+        }
+        Update: {
+          accuracy_percentage?: number | null
+          accurate_predictions?: number | null
+          average_deviation_minutes?: number | null
+          created_at?: string | null
+          demand_prediction_accuracy?: number | null
+          detailed_metrics?: Json | null
+          id?: string
+          maintenance_reduction_rate?: number | null
+          metric_date?: string
+          metric_type?: string | null
+          ml_model_version?: string | null
+          punctuality_rate?: number | null
+          total_conflicts_actual?: number | null
+          total_conflicts_predicted?: number | null
+          total_predictions?: number | null
+          weather_prediction_accuracy?: number | null
         }
         Relationships: []
       }
@@ -582,6 +788,51 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      weather_data: {
+        Row: {
+          conditions: string | null
+          created_at: string | null
+          flooding_risk_score: number | null
+          forecast_data: Json | null
+          humidity: number | null
+          id: string
+          rainfall: number | null
+          temperature: number | null
+          timestamp: string
+          visibility: number | null
+          weather_severity_score: number | null
+          wind_speed: number | null
+        }
+        Insert: {
+          conditions?: string | null
+          created_at?: string | null
+          flooding_risk_score?: number | null
+          forecast_data?: Json | null
+          humidity?: number | null
+          id?: string
+          rainfall?: number | null
+          temperature?: number | null
+          timestamp?: string
+          visibility?: number | null
+          weather_severity_score?: number | null
+          wind_speed?: number | null
+        }
+        Update: {
+          conditions?: string | null
+          created_at?: string | null
+          flooding_risk_score?: number | null
+          forecast_data?: Json | null
+          humidity?: number | null
+          id?: string
+          rainfall?: number | null
+          temperature?: number | null
+          timestamp?: string
+          visibility?: number | null
+          weather_severity_score?: number | null
+          wind_speed?: number | null
         }
         Relationships: []
       }
