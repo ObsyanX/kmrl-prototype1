@@ -1,86 +1,95 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { ExternalLink, AlertTriangle, CheckCircle, Clock, Wrench, RefreshCw } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ExternalLink, AlertTriangle, CheckCircle, Clock, Wrench, RefreshCw, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const JobCardStatus: React.FC = () => {
   const [isHoldModalOpen, setIsHoldModalOpen] = useState(false);
   const [holdJustification, setHoldJustification] = useState('');
   const [selectedTrain, setSelectedTrain] = useState('');
+  const [maintenanceData, setMaintenanceData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   
-  const maintenanceData = [
-    {
-      id: 'T01',
-      status: 'In Service',
-      location: 'Track A1',
-      lastSync: '2 min ago',
-      criticalJobs: 0,
-      majorJobs: 0,
-      minorJobs: 1,
-      releaseFlag: true,
-      manualHold: false,
-      totalJobs: 1,
-      maximoLink: 'WO-2024-001',
-    },
-    {
-      id: 'T03',
-      status: 'In IBL',
-      location: 'Bay 2',
-      lastSync: '1 min ago',
-      criticalJobs: 2,
-      majorJobs: 1,
-      minorJobs: 3,
-      releaseFlag: false,
-      manualHold: false,
-      totalJobs: 6,
-      maximoLink: 'WO-2024-003',
-    },
-    {
-      id: 'T05',
-      status: 'On Standby',
-      location: 'Track C1',
-      lastSync: '5 min ago',
-      criticalJobs: 0,
-      majorJobs: 2,
-      minorJobs: 0,
-      releaseFlag: false,
-      manualHold: true,
-      totalJobs: 2,
-      maximoLink: 'WO-2024-005',
-      holdReason: 'Awaiting spare parts delivery',
-    },
-    {
-      id: 'T07',
-      status: 'In Service',
-      location: 'Active Route',
-      lastSync: '1 min ago',
-      criticalJobs: 0,
-      majorJobs: 0,
-      minorJobs: 0,
-      releaseFlag: true,
-      manualHold: false,
-      totalJobs: 0,
-      maximoLink: null,
-    },
-    {
-      id: 'T12',
-      status: 'In IBL',
-      location: 'Bay 1',
-      lastSync: '3 min ago',
-      criticalJobs: 1,
-      majorJobs: 0,
-      minorJobs: 2,
-      releaseFlag: false,
-      manualHold: false,
-      totalJobs: 3,
-      maximoLink: 'WO-2024-012',
-    },
-  ];
+  useEffect(() => {
+    fetchMaintenanceStatus();
+
+    // Real-time updates
+    const channel = supabase
+      .channel('job_card_updates')
+      .on('postgres_changes',
+        { event: '*', schema: 'public', table: 'maintenance_jobs' },
+        () => {
+          fetchMaintenanceStatus();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchMaintenanceStatus = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch trainsets with maintenance jobs
+      const { data: trainsets, error: trainsetsError } = await supabase
+        .from('trainsets')
+        .select('*');
+
+      if (trainsetsError) throw trainsetsError;
+
+      // Fetch maintenance jobs
+      const { data: jobs, error: jobsError } = await supabase
+        .from('maintenance_jobs')
+        .select('*')
+        .in('status', ['pending', 'in_progress', 'scheduled']);
+
+      if (jobsError) throw jobsError;
+
+      // Process data for each train
+      const enrichedData = trainsets.map((train: any) => {
+        const trainJobs = jobs?.filter((j: any) => j.trainset_id === train.id) || [];
+        
+        const criticalJobs = trainJobs.filter(j => j.priority === 'critical').length;
+        const majorJobs = trainJobs.filter(j => j.priority === 'high').length;
+        const minorJobs = trainJobs.filter(j => j.priority === 'medium' || j.priority === 'low').length;
+        
+        const releaseFlag = trainJobs.length === 0 || criticalJobs === 0;
+        const manualHold = train.metadata?.manual_hold || false;
+
+        return {
+          id: train.id,
+          status: train.status === 'maintenance' ? 'In IBL' : train.status === 'operational' ? 'In Service' : 'On Standby',
+          location: train.current_stabling_position || train.current_location || 'Unknown',
+          lastSync: 'Live',
+          criticalJobs,
+          majorJobs,
+          minorJobs,
+          releaseFlag,
+          manualHold,
+          totalJobs: trainJobs.length,
+          maximoLink: trainJobs[0]?.maximo_job_id || null,
+          holdReason: train.metadata?.hold_reason || null
+        };
+      });
+
+      setMaintenanceData(enrichedData);
+    } catch (error) {
+      console.error('Error fetching maintenance status:', error);
+      toast.error('Failed to fetch job card status');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -103,11 +112,8 @@ const JobCardStatus: React.FC = () => {
 
   const getHexagonPosition = (index: number) => {
     const positions = [
-      { x: 20, y: 20 },
-      { x: 60, y: 20 },
-      { x: 100, y: 20 },
-      { x: 40, y: 60 },
-      { x: 80, y: 60 },
+      { x: 20, y: 20 }, { x: 60, y: 20 }, { x: 100, y: 20 },
+      { x: 40, y: 60 }, { x: 80, y: 60 }
     ];
     return positions[index] || { x: 50, y: 50 };
   };
@@ -134,6 +140,36 @@ const JobCardStatus: React.FC = () => {
     setIsHoldModalOpen(true);
   };
 
+  const handleConfirmHold = async () => {
+    if (holdJustification.length < 25) {
+      toast.error('Please provide at least 25 characters of justification');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('trainsets')
+        .update({
+          metadata: {
+            manual_hold: true,
+            hold_reason: holdJustification,
+            hold_timestamp: new Date().toISOString()
+          }
+        })
+        .eq('id', selectedTrain);
+
+      if (error) throw error;
+
+      toast.success(`Manual hold placed on ${selectedTrain}`);
+      setIsHoldModalOpen(false);
+      setHoldJustification('');
+      fetchMaintenanceStatus();
+    } catch (error) {
+      console.error('Error placing hold:', error);
+      toast.error('Failed to place manual hold');
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       <div className="flex items-center justify-between">
@@ -141,8 +177,8 @@ const JobCardStatus: React.FC = () => {
           <h1 className="text-3xl font-bold text-glow">Maintenance Work Orders</h1>
           <p className="text-muted-foreground">Real-time interface to IBM Maximo maintenance system</p>
         </div>
-        <Button variant="outline" className="gap-2">
-          <RefreshCw className="w-4 h-4" />
+        <Button variant="outline" className="gap-2" onClick={fetchMaintenanceStatus} disabled={loading}>
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Sync with Maximo
         </Button>
       </div>
@@ -209,7 +245,7 @@ const JobCardStatus: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="h-64 relative bg-gradient-to-br from-primary/5 to-kmrl-green/5 rounded-lg border border-primary/20">
-            {maintenanceData.map((train, index) => {
+            {maintenanceData.slice(0, 5).map((train, index) => {
               const position = getHexagonPosition(index);
               const intensity = getHexagonIntensity(train);
               const intensityColor = getIntensityColor(intensity);
@@ -279,105 +315,112 @@ const JobCardStatus: React.FC = () => {
           <CardDescription>Complete work order breakdown with Maximo integration</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {maintenanceData.map((train) => (
-              <div key={train.id} className="glass-card p-4 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <h3 className="font-semibold text-xl">{train.id}</h3>
-                    <Badge variant={getStatusColor(train.status)}>
-                      {train.status}
-                    </Badge>
-                    {train.manualHold && (
-                      <Badge variant="outline" className="border-primary text-primary">
-                        Manual Hold
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <span className="ml-3 text-muted-foreground">Loading job card status...</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {maintenanceData.map((train) => (
+                <div key={train.id} className="glass-card p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <h3 className="font-semibold text-xl">{train.id}</h3>
+                      <Badge variant={getStatusColor(train.status) as any}>
+                        {train.status}
                       </Badge>
-                    )}
-                    {!train.releaseFlag && (
-                      <AlertTriangle className="w-5 h-5 text-warning" />
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="text-right text-sm">
-                      <div className="text-muted-foreground">Location</div>
-                      <div className="font-medium">{train.location}</div>
-                    </div>
-                    <div className="text-right text-sm">
-                      <div className="text-muted-foreground">Last Sync</div>
-                      <div className="font-medium text-success">{train.lastSync}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-4 gap-4">
-                  <div className="text-center">
-                    <Badge variant={getSeverityColor('critical', train.criticalJobs)} className="w-full">
-                      {train.criticalJobs} Critical
-                    </Badge>
-                  </div>
-                  <div className="text-center">
-                    <Badge variant={getSeverityColor('major', train.majorJobs)} className="w-full">
-                      {train.majorJobs} Major
-                    </Badge>
-                  </div>
-                  <div className="text-center">
-                    <Badge variant={getSeverityColor('minor', train.minorJobs)} className="w-full">
-                      {train.minorJobs} Minor
-                    </Badge>
-                  </div>
-                  <div className="text-center">
-                    <div className={`flex items-center justify-center gap-2 p-2 rounded ${
-                      train.releaseFlag ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
-                    }`}>
-                      {train.releaseFlag ? (
-                        <>
-                          <CheckCircle className="w-4 h-4" />
-                          <span className="text-sm font-medium">Clear for Service</span>
-                        </>
-                      ) : (
-                        <>
-                          <Clock className="w-4 h-4" />
-                          <span className="text-sm font-medium">Hold for Maintenance</span>
-                        </>
+                      {train.manualHold && (
+                        <Badge variant="outline" className="border-primary text-primary">
+                          Manual Hold
+                        </Badge>
+                      )}
+                      {!train.releaseFlag && (
+                        <AlertTriangle className="w-5 h-5 text-warning" />
                       )}
                     </div>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="text-right text-sm">
+                        <div className="text-muted-foreground">Location</div>
+                        <div className="font-medium">{train.location}</div>
+                      </div>
+                      <div className="text-right text-sm">
+                        <div className="text-muted-foreground">Last Sync</div>
+                        <div className="font-medium text-success">{train.lastSync}</div>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                {train.manualHold && train.holdReason && (
-                  <div className="bg-primary/10 border border-primary/20 rounded p-3">
-                    <div className="text-sm font-medium text-primary mb-1">Manual Hold Reason:</div>
-                    <div className="text-sm text-muted-foreground">{train.holdReason}</div>
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="text-center">
+                      <Badge variant={getSeverityColor('critical', train.criticalJobs) as any} className="w-full">
+                        {train.criticalJobs} Critical
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <Badge variant={getSeverityColor('major', train.majorJobs) as any} className="w-full">
+                        {train.majorJobs} Major
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <Badge variant={getSeverityColor('minor', train.minorJobs) as any} className="w-full">
+                        {train.minorJobs} Minor
+                      </Badge>
+                    </div>
+                    <div className="text-center">
+                      <div className={`flex items-center justify-center gap-2 p-2 rounded ${
+                        train.releaseFlag ? 'bg-success/20 text-success' : 'bg-destructive/20 text-destructive'
+                      }`}>
+                        {train.releaseFlag ? (
+                          <>
+                            <CheckCircle className="w-4 h-4" />
+                            <span className="text-sm font-medium">Clear for Service</span>
+                          </>
+                        ) : (
+                          <>
+                            <Clock className="w-4 h-4" />
+                            <span className="text-sm font-medium">Hold for Maintenance</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                )}
 
-                <div className="flex items-center justify-between pt-2 border-t border-primary/10">
-                  <div className="flex items-center gap-4">
-                    {train.maximoLink && (
-                      <Button variant="outline" size="sm" className="gap-2">
-                        <ExternalLink className="w-4 h-4" />
-                        View in Maximo ({train.maximoLink})
-                      </Button>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor={`hold-${train.id}`} className="text-sm">
-                        Manual Hold
-                      </Label>
-                      <Switch
-                        id={`hold-${train.id}`}
-                        checked={train.manualHold}
-                        onCheckedChange={() => !train.manualHold && handleManualHold(train.id)}
-                      />
+                  {train.manualHold && train.holdReason && (
+                    <div className="bg-primary/10 border border-primary/20 rounded p-3">
+                      <div className="text-sm font-medium text-primary mb-1">Manual Hold Reason:</div>
+                      <div className="text-sm text-muted-foreground">{train.holdReason}</div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-2 border-t border-primary/10">
+                    <div className="flex items-center gap-4">
+                      {train.maximoLink && (
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <ExternalLink className="w-4 h-4" />
+                          View in Maximo ({train.maximoLink})
+                        </Button>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor={`hold-${train.id}`} className="text-sm">
+                          Manual Hold
+                        </Label>
+                        <Switch
+                          id={`hold-${train.id}`}
+                          checked={train.manualHold}
+                          onCheckedChange={() => !train.manualHold && handleManualHold(train.id)}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -407,7 +450,7 @@ const JobCardStatus: React.FC = () => {
             
             <div className="flex gap-2 pt-4">
               <Button 
-                onClick={() => setIsHoldModalOpen(false)} 
+                onClick={handleConfirmHold}
                 className="flex-1"
                 disabled={holdJustification.length < 25}
               >

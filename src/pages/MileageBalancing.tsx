@@ -1,24 +1,85 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
 import { Slider } from '@/components/ui/slider';
-import { BarChart3, AlertTriangle, TrendingUp, Settings } from 'lucide-react';
+import { Train, TrendingUp, TrendingDown, AlertTriangle, Settings, BarChart3, Loader2, RefreshCw, Brain } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import { useOptimization } from '@/hooks/useOptimization';
+import { useTrainsets } from '@/hooks/useTrainsets';
 
 const MileageBalancing: React.FC = () => {
   const [alertThreshold, setAlertThreshold] = useState([15]);
-  
-  const fleetData = [
-    { id: 'KRISHNA', mileage: 45200, variance: 8.2, status: 'normal', components: { bogies: 42000, brakes: 38500, hvac: 44800 } },
-    { id: 'TAPTI', mileage: 52800, variance: 22.1, status: 'over', components: { bogies: 51200, brakes: 47300, hvac: 52100 } },
-    { id: 'NILA', mileage: 38900, variance: -18.5, status: 'under', components: { bogies: 37800, brakes: 35200, hvac: 38400 } },
-    { id: 'SARAYU', mileage: 47600, variance: 4.5, status: 'normal', components: { bogies: 46800, brakes: 44200, hvac: 47200 } },
-    { id: 'ARUTH', mileage: 41300, variance: -12.3, status: 'under', components: { bogies: 40500, brakes: 38900, hvac: 40800 } },
-  ];
-  
-  const fleetAverage = 45160;
+  const [fleetData, setFleetData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [fleetAverage, setFleetAverage] = useState(0);
+  const [balancingRecommendations, setBalancingRecommendations] = useState<any>(null);
+  const { getAIRecommendation } = useOptimization();
+  const { trainsets } = useTrainsets();
+
+  useEffect(() => {
+    fetchMileageData();
+  }, [trainsets]);
+
+  const fetchMileageData = async () => {
+    try {
+      setLoading(true);
+      
+      // Fetch mileage records for last 30 days
+      const { data: mileageRecords, error: mileageError } = await supabase
+        .from('mileage_records')
+        .select('*')
+        .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+
+      if (mileageError) throw mileageError;
+
+      // Process trainset mileage data
+      const enrichedData = trainsets.map((train: any) => {
+        const totalMileage = Number(train.total_mileage) || 0;
+        const trainRecords = mileageRecords?.filter((r: any) => r.trainset_id === train.id) || [];
+        const last30DaysMileage = trainRecords.reduce((sum: number, r: any) => sum + Number(r.daily_mileage || 0), 0);
+        
+        return {
+          trainId: train.id,
+          mileage: totalMileage,
+          last30Days: last30DaysMileage,
+          bogies: Math.round(totalMileage * 0.95),
+          brakes: Math.round(totalMileage * 0.92),
+          hvac: Math.round(totalMileage * 0.88)
+        };
+      });
+
+      // Calculate fleet average
+      const average = enrichedData.reduce((sum, t) => sum + t.mileage, 0) / (enrichedData.length || 1);
+      
+      // Add variance and status
+      const dataWithStatus = enrichedData.map(train => {
+        const variance = ((train.mileage - average) / average * 100);
+        let status: 'over' | 'under' | 'normal' = 'normal';
+        if (variance > alertThreshold[0]) status = 'over';
+        else if (variance < -alertThreshold[0]) status = 'under';
+
+        return { ...train, variance: variance.toFixed(1), status };
+      });
+
+      setFleetData(dataWithStatus);
+      setFleetAverage(average);
+
+      // Get AI balancing recommendations
+      const aiRec = await getAIRecommendation(undefined, 'resource_allocation', {
+        fleet_data: dataWithStatus,
+        threshold: alertThreshold[0]
+      });
+      setBalancingRecommendations(aiRec);
+    } catch (error) {
+      console.error('Error fetching mileage data:', error);
+      toast.error('Failed to fetch mileage data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -36,181 +97,189 @@ const MileageBalancing: React.FC = () => {
     }
   };
 
+  const overUtilized = fleetData.filter(t => t.status === 'over').length;
+  const underUtilized = fleetData.filter(t => t.status === 'under').length;
+
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
+    <div className="min-h-screen bg-gradient-cockpit p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-glow">Fleet Mileage & Component Wear</h1>
-          <p className="text-muted-foreground">Monitor and manage equalization of wear across the fleet</p>
+          <h1 className="text-3xl font-bold text-glow mb-2">AI-Powered Mileage Balancing</h1>
+          <p className="text-muted-foreground">
+            Optimize fleet utilization and component wear through intelligent mileage distribution
+          </p>
         </div>
-        <Button variant="outline" className="gap-2">
-          <Settings className="w-4 h-4" />
-          Configure Alerts
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={fetchMileageData} disabled={loading}>
+            <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button variant="neural">
+            <Settings className="w-4 h-4 mr-2" />
+            Configure
+          </Button>
+        </div>
       </div>
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Fleet Average</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{fleetAverage.toLocaleString()} km</div>
-            <p className="text-xs text-muted-foreground">Across all trainsets</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Over Utilized</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">
-              {fleetData.filter(t => t.status === 'over').length}
-            </div>
-            <p className="text-xs text-muted-foreground">Trains above threshold</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Under Utilized</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">
-              {fleetData.filter(t => t.status === 'under').length}
-            </div>
-            <p className="text-xs text-muted-foreground">Trains below threshold</p>
-          </CardContent>
-        </Card>
-
-        <Card className="glass-card">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Alert Threshold</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-primary">{alertThreshold[0]}%</div>
-            <p className="text-xs text-muted-foreground">Deviation from average</p>
-          </CardContent>
-        </Card>
+        {[
+          { title: "Fleet Average", value: `${Math.round(fleetAverage)} km`, icon: Train, color: "primary" },
+          { title: "Over Utilized", value: overUtilized, icon: TrendingUp, color: "destructive" },
+          { title: "Under Utilized", value: underUtilized, icon: TrendingDown, color: "warning" },
+          { title: "Alert Threshold", value: `±${alertThreshold[0]}%`, icon: AlertTriangle, color: "secondary" }
+        ].map((stat, index) => (
+          <Card key={index} className="glass-card border-primary/20 hologram-glow">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">{stat.title}</p>
+                  <p className="text-2xl font-bold text-glow">{stat.value}</p>
+                </div>
+                <stat.icon className={`w-8 h-8 ${
+                  stat.color === 'destructive' ? 'text-destructive' :
+                  stat.color === 'warning' ? 'text-warning' :
+                  stat.color === 'success' ? 'text-success' : 'text-primary'
+                }`} />
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
+      {/* AI Recommendations */}
+      {balancingRecommendations && (
+        <Card className="glass-card border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-glow flex items-center gap-2">
+              <Brain className="w-5 h-5" />
+              AI Balancing Recommendations
+            </CardTitle>
+            <CardDescription>
+              ML-powered suggestions for optimal fleet utilization (Confidence: {(balancingRecommendations.confidence_score * 100).toFixed(1)}%)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {balancingRecommendations.recommendations?.slice(0, 3).map((rec: any, idx: number) => (
+                <div key={idx} className="glass-card p-3 border border-primary/10">
+                  <p className="text-sm text-foreground">{rec.action || rec.reasoning}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Alert Threshold Configuration */}
-      <Card className="glass-card">
+      <Card className="glass-card border-primary/20">
         <CardHeader>
-          <CardTitle>Mileage Alert Configuration</CardTitle>
-          <CardDescription>
-            Set the percentage deviation from average mileage at which trains are flagged
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Alert Deviation from Fleet Average (%)</Label>
-            <div className="px-3">
-              <Slider
-                value={alertThreshold}
-                onValueChange={setAlertThreshold}
-                max={25}
-                min={5}
-                step={1}
-                className="w-full"
-              />
-            </div>
-            <div className="flex justify-between text-sm text-muted-foreground">
-              <span>5%</span>
-              <span className="font-medium">{alertThreshold[0]}%</span>
-              <span>25%</span>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Current setting: Trains with mileage ±{alertThreshold[0]}% from average ({fleetAverage.toLocaleString()} km) will be flagged
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* 3D Mileage Visualization - Placeholder for actual 3D chart */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            Fleet Mileage Distribution
-          </CardTitle>
-          <CardDescription>Interactive 3D visualization of train utilization</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64 bg-gradient-to-br from-primary/5 to-kmrl-green/5 rounded-lg border border-primary/20 flex items-center justify-center">
-            <div className="text-center">
-              <BarChart3 className="w-12 h-12 text-primary mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">3D Interactive Chart</p>
-              <p className="text-xs text-muted-foreground">Click and drag to rotate • Scroll to zoom</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Detailed Fleet Table */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle>Detailed Fleet Analysis</CardTitle>
-          <CardDescription>Complete mileage breakdown by train and component</CardDescription>
+          <CardTitle className="text-glow">Alert Threshold Configuration</CardTitle>
+          <CardDescription>Set the deviation percentage for over/under utilization alerts</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {fleetData.map((train) => (
-              <div key={train.id} className="glass-card p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <h3 className="font-semibold text-lg">{train.id}</h3>
-                    <Badge variant={getStatusColor(train.status)}>
-                      {getStatusLabel(train.status)}
-                    </Badge>
-                    {Math.abs(train.variance) > alertThreshold[0] && (
-                      <AlertTriangle className="w-4 h-4 text-warning" />
-                    )}
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold">{train.mileage.toLocaleString()} km</div>
-                    <div className={`text-sm ${train.variance > 0 ? 'text-destructive' : 'text-warning'}`}>
-                      {train.variance > 0 ? '+' : ''}{train.variance.toFixed(1)}% from average
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium">Deviation Threshold:</span>
+              <Slider
+                value={alertThreshold}
+                onValueChange={(val) => {
+                  setAlertThreshold(val);
+                  fetchMileageData();
+                }}
+                max={30}
+                min={5}
+                step={1}
+                className="flex-1"
+              />
+              <Badge variant="outline">±{alertThreshold[0]}%</Badge>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Fleet Analysis */}
+      <Card className="glass-card border-primary/20">
+        <CardHeader>
+          <CardTitle className="text-glow">Detailed Fleet Analysis</CardTitle>
+          <CardDescription>Individual train mileage breakdown with component wear tracking</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <span className="ml-3 text-muted-foreground">Loading mileage data...</span>
+            </div>
+          ) : fleetData.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              No mileage data available
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {fleetData.map((train) => {
+                const deviationPercent = parseFloat(train.variance);
+                const progressValue = 50 + deviationPercent; // Center at 50%
+                
+                return (
+                  <div key={train.trainId} className="glass-card p-6 rounded-lg border border-primary/10">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <Train className="w-6 h-6 text-primary" />
+                        <div>
+                          <h3 className="font-bold text-foreground">{train.trainId}</h3>
+                          <p className="text-sm text-muted-foreground">Total: {train.mileage} km | Last 30d: {train.last30Days} km</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge variant={getStatusColor(train.status) as any}>
+                          {getStatusLabel(train.status)}
+                        </Badge>
+                        <span className={`text-sm font-medium ${
+                          deviationPercent > 0 ? 'text-destructive' : 
+                          deviationPercent < 0 ? 'text-warning' : 'text-success'
+                        }`}>
+                          {deviationPercent > 0 ? '+' : ''}{train.variance}% from average
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Component Mileage */}
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Bogies</p>
+                        <p className="text-sm font-medium">{train.bogies} km</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">Brakes</p>
+                        <p className="text-sm font-medium">{train.brakes} km</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-muted-foreground mb-1">HVAC</p>
+                        <p className="text-sm font-medium">{train.hvac} km</p>
+                      </div>
+                    </div>
+
+                    {/* Mileage Progress Bar */}
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>Under Utilized</span>
+                        <span>Balanced</span>
+                        <span>Over Utilized</span>
+                      </div>
+                      <Progress 
+                        value={Math.min(100, Math.max(0, progressValue))}
+                        className={`h-3 ${
+                          train.status === 'over' ? '[&>div]:bg-destructive' :
+                          train.status === 'under' ? '[&>div]:bg-warning' :
+                          '[&>div]:bg-success'
+                        }`}
+                      />
                     </div>
                   </div>
-                </div>
-                
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <div className="text-sm text-muted-foreground">Bogies</div>
-                    <div className="font-medium">{train.components.bogies.toLocaleString()} km</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm text-muted-foreground">Brake Systems</div>
-                    <div className="font-medium">{train.components.brakes.toLocaleString()} km</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-sm text-muted-foreground">HVAC Units</div>
-                    <div className="font-medium">{train.components.hvac.toLocaleString()} km</div>
-                  </div>
-                </div>
-                
-                {/* Progress bar showing mileage relative to fleet average */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Utilization vs Fleet Average</span>
-                    <span>{((train.mileage / fleetAverage) * 100).toFixed(1)}%</span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-2">
-                    <div 
-                      className={`h-2 rounded-full transition-all duration-500 ${
-                        train.variance > alertThreshold[0] ? 'bg-destructive' :
-                        train.variance < -alertThreshold[0] ? 'bg-warning' : 'bg-success'
-                      }`}
-                      style={{ width: `${Math.min(100, (train.mileage / fleetAverage) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
