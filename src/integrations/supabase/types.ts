@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      accuracy_metrics: {
+        Row: {
+          accuracy_percentage: number | null
+          accurate_predictions: number
+          confidence_score_avg: number | null
+          created_at: string | null
+          detailed_metrics: Json | null
+          id: string
+          metric_date: string
+          model_version: string | null
+          prediction_type: string
+          total_predictions: number
+        }
+        Insert: {
+          accuracy_percentage?: number | null
+          accurate_predictions?: number
+          confidence_score_avg?: number | null
+          created_at?: string | null
+          detailed_metrics?: Json | null
+          id?: string
+          metric_date: string
+          model_version?: string | null
+          prediction_type: string
+          total_predictions?: number
+        }
+        Update: {
+          accuracy_percentage?: number | null
+          accurate_predictions?: number
+          confidence_score_avg?: number | null
+          created_at?: string | null
+          detailed_metrics?: Json | null
+          id?: string
+          metric_date?: string
+          model_version?: string | null
+          prediction_type?: string
+          total_predictions?: number
+        }
+        Relationships: []
+      }
+      algorithm_configurations: {
+        Row: {
+          config_name: string
+          constraints: Json
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_active: boolean | null
+          ml_parameters: Json | null
+          thresholds: Json
+          updated_at: string | null
+          version: string
+          weights: Json
+        }
+        Insert: {
+          config_name: string
+          constraints?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          ml_parameters?: Json | null
+          thresholds?: Json
+          updated_at?: string | null
+          version: string
+          weights?: Json
+        }
+        Update: {
+          config_name?: string
+          constraints?: Json
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          ml_parameters?: Json | null
+          thresholds?: Json
+          updated_at?: string | null
+          version?: string
+          weights?: Json
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -131,6 +212,108 @@ export type Database = {
           notes?: string | null
           ridership_multiplier?: number | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      cleaning_schedules: {
+        Row: {
+          assigned_crew: string[] | null
+          bay_number: string | null
+          checklist: Json | null
+          cleaning_type: string
+          completion_time: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          photo_urls: string[] | null
+          quality_score: number | null
+          scheduled_date: string
+          scheduled_time: string
+          status: string
+          trainset_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_crew?: string[] | null
+          bay_number?: string | null
+          checklist?: Json | null
+          cleaning_type: string
+          completion_time?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          photo_urls?: string[] | null
+          quality_score?: number | null
+          scheduled_date: string
+          scheduled_time: string
+          status?: string
+          trainset_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_crew?: string[] | null
+          bay_number?: string | null
+          checklist?: Json | null
+          cleaning_type?: string
+          completion_time?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          photo_urls?: string[] | null
+          quality_score?: number | null
+          scheduled_date?: string
+          scheduled_time?: string
+          status?: string
+          trainset_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      daily_induction_plans: {
+        Row: {
+          approved: boolean | null
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string | null
+          demand_forecast: Json | null
+          generated_at: string | null
+          id: string
+          optimization_summary: Json | null
+          plan_date: string
+          trainsets_for_service: string[]
+          trainsets_in_maintenance: string[]
+          trainsets_on_standby: string[]
+          weather_context: Json | null
+        }
+        Insert: {
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          demand_forecast?: Json | null
+          generated_at?: string | null
+          id?: string
+          optimization_summary?: Json | null
+          plan_date: string
+          trainsets_for_service: string[]
+          trainsets_in_maintenance: string[]
+          trainsets_on_standby: string[]
+          weather_context?: Json | null
+        }
+        Update: {
+          approved?: boolean | null
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string | null
+          demand_forecast?: Json | null
+          generated_at?: string | null
+          id?: string
+          optimization_summary?: Json | null
+          plan_date?: string
+          trainsets_for_service?: string[]
+          trainsets_in_maintenance?: string[]
+          trainsets_on_standby?: string[]
+          weather_context?: Json | null
         }
         Relationships: []
       }
@@ -272,6 +455,60 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      incidents: {
+        Row: {
+          assigned_to: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          impact_analysis: Json | null
+          incident_number: string
+          reported_at: string | null
+          reported_by: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+          title: string
+          trainset_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact_analysis?: Json | null
+          incident_number: string
+          reported_at?: string | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity: string
+          status?: string
+          title: string
+          trainset_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact_analysis?: Json | null
+          incident_number?: string
+          reported_at?: string | null
+          reported_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+          title?: string
+          trainset_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       jobs: {
         Row: {
