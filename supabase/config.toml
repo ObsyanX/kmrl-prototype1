@@ -23,3 +23,6 @@ verify_jwt = false
 
 [functions.performance-tracker]
 verify_jwt = false
+
+[functions.data-seeder]
+verify_jwt = false

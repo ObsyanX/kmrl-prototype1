@@ -14,12 +14,67 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const openWeatherKey = Deno.env.get('OPENWEATHER_API_KEY');
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { action = 'get_current' } = await req.json();
 
     if (action === 'get_current') {
-      // Get latest weather data or simulate if not available
+      // Fetch real weather from OpenWeather API
+      if (openWeatherKey) {
+        try {
+          const response = await fetch(
+            `https://api.openweathermap.org/data/2.5/weather?q=Kochi,IN&appid=${openWeatherKey}&units=metric`
+          );
+          
+          if (response.ok) {
+            const owData = await response.json();
+            
+            const weatherData = {
+              timestamp: new Date().toISOString(),
+              temperature: Number(owData.main.temp.toFixed(2)),
+              humidity: owData.main.humidity,
+              rainfall: owData.rain?.['1h'] || 0,
+              visibility: owData.visibility,
+              wind_speed: Number(owData.wind.speed.toFixed(2)),
+              conditions: owData.weather[0].main.toLowerCase(),
+              weather_severity_score: calculateSeverityScore(
+                owData.rain?.['1h'] || 0,
+                owData.wind.speed,
+                owData.visibility
+              ),
+              flooding_risk_score: (owData.rain?.['1h'] || 0) > 30 
+                ? Math.min(10, Math.floor((owData.rain?.['1h'] || 0) / 5)) 
+                : 0,
+              forecast_data: {},
+            };
+
+            // Store real weather data
+            const { data: newWeather, error } = await supabase
+              .from('weather_data')
+              .insert([weatherData])
+              .select()
+              .single();
+
+            if (error) {
+              console.error('Error storing weather data:', error);
+            }
+
+            return new Response(JSON.stringify({
+              success: true,
+              weather: weatherData,
+              impact_assessment: assessWeatherImpact(weatherData),
+              source: 'OpenWeather API',
+            }), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            });
+          }
+        } catch (fetchError) {
+          console.error('OpenWeather API error:', fetchError);
+        }
+      }
+
+      // Fallback: Get latest from DB or simulate
       const { data: latestWeather } = await supabase
         .from('weather_data')
         .select('*')
@@ -32,12 +87,13 @@ serve(async (req) => {
           success: true,
           weather: latestWeather,
           impact_assessment: assessWeatherImpact(latestWeather),
+          source: 'Database',
         }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      // Simulate weather data if none exists
+      // Last resort: simulate
       const simulatedWeather = generateWeatherData();
       
       const { data: newWeather, error } = await supabase
@@ -52,7 +108,7 @@ serve(async (req) => {
         success: true,
         weather: newWeather,
         impact_assessment: assessWeatherImpact(newWeather),
-        simulated: true,
+        source: 'Simulated',
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
