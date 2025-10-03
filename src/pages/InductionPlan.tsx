@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, Calendar, Clock, Train, Users, CheckCircle, AlertTriangle, Zap, Loader2, Sparkles } from 'lucide-react';
+import { Brain, Calendar, Clock, Train, Users, CheckCircle, AlertTriangle, Zap, Loader2, Sparkles, Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -56,37 +56,49 @@ const InductionPlan: React.FC = () => {
     try {
       const plans = [];
       
-      // Generate AI-powered induction plans for operational trains
-      const operationalTrains = trainsets.filter(t => 
-        t.status === 'operational' || t.status === 'maintenance'
-      ).slice(0, 5); // Limit to 5 trains for performance
+      // Generate AI-powered induction plans for ALL trains (25 trainsets)
+      const allTrains = trainsets.filter(t => 
+        t.status === 'operational' || t.status === 'maintenance' || t.status === 'standby'
+      );
 
-      for (const train of operationalTrains) {
-        const plan = await planInduction(train.id, undefined, 'normal');
-        
-        if (plan) {
-          // Get AI recommendation for this specific induction
-          const aiRec = await getAIRecommendation(train.id, 'induction_planning', {
-            trainset: train,
-            plan
-          });
+      console.log(`Generating plans for ${allTrains.length} trainsets...`);
 
-          plans.push({
-            id: train.id,
-            trainId: train.id,
-            shift: getNextShift(),
-            priority: plan.priority || 'normal',
-            crew: plan.assigned_staff || ['To be assigned'],
-            estimatedDuration: plan.estimated_duration || '2h 15m',
-            confidence: aiRec?.confidence_score || (Math.random() * 0.15 + 0.85),
-            reasoning: aiRec?.recommendations?.[0]?.reasoning || plan.recommendations?.[0] || 'Optimal induction timing based on operational schedule',
-            canProceed: plan.can_proceed,
-            blockingIssues: plan.blocking_issues || []
-          });
+      for (const train of allTrains) {
+        try {
+          const plan = await planInduction(train.id, undefined, 'normal');
+          
+          if (plan) {
+            // Get AI recommendation for this specific induction
+            const aiRec = await getAIRecommendation(train.id, 'induction_planning', {
+              trainset: train,
+              plan
+            });
+
+            plans.push({
+              id: train.id,
+              trainId: train.id,
+              trainName: train.name,
+              shift: getNextShift(),
+              priority: plan.priority || 'normal',
+              crew: plan.assigned_staff || ['To be assigned'],
+              estimatedDuration: plan.estimated_duration || '2h 15m',
+              confidence: aiRec?.confidence_score || (Math.random() * 0.15 + 0.85),
+              reasoning: aiRec?.recommendations?.[0]?.reasoning || plan.recommendations?.[0] || 'Optimal induction timing based on operational schedule',
+              canProceed: plan.can_proceed,
+              blockingIssues: plan.blocking_issues || [],
+              stablingPosition: train.current_stabling_position || 'TBA',
+              lastMaintenance: train.last_maintenance_date || 'N/A',
+              fitnessExpiry: train.fitness_certificate_expiry || 'N/A',
+            });
+          }
+        } catch (error) {
+          console.error(`Error generating plan for ${train.id}:`, error);
+          // Continue with other trains even if one fails
         }
       }
 
       setRecommendations(plans);
+      toast.success(`Generated induction plans for ${plans.length} trainsets`);
     } catch (error) {
       console.error('Error generating induction plans:', error);
       toast.error('Failed to generate induction plans');
@@ -144,6 +156,132 @@ const InductionPlan: React.FC = () => {
     toast.info(`Override requested for ${recommendation.id} - Manual planning mode activated`);
   };
 
+  const downloadInductionPlanCSV = () => {
+    if (recommendations.length === 0) {
+      toast.error('No induction plans to download');
+      return;
+    }
+
+    // Create CSV content
+    const headers = [
+      'Train ID',
+      'Train Name',
+      'Shift',
+      'Priority',
+      'Stabling Position',
+      'Estimated Duration',
+      'AI Confidence',
+      'Can Proceed',
+      'Assigned Crew',
+      'Last Maintenance',
+      'Fitness Expiry',
+      'Blocking Issues',
+      'AI Reasoning'
+    ];
+
+    const rows = recommendations.map(rec => [
+      rec.trainId,
+      rec.trainName,
+      rec.shift,
+      rec.priority,
+      rec.stablingPosition,
+      rec.estimatedDuration,
+      `${(rec.confidence * 100).toFixed(1)}%`,
+      rec.canProceed ? 'Yes' : 'No',
+      rec.crew.join('; '),
+      rec.lastMaintenance,
+      rec.fitnessExpiry,
+      rec.blockingIssues.join('; '),
+      rec.reasoning.replace(/,/g, ';') // Replace commas to avoid CSV issues
+    ]);
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n');
+
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `induction_plan_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Induction plan downloaded successfully');
+  };
+
+  const downloadInductionPlanPDF = () => {
+    if (recommendations.length === 0) {
+      toast.error('No induction plans to download');
+      return;
+    }
+
+    // Create a formatted text document (simplified PDF alternative)
+    const title = `KMRL TRAIN INDUCTION PLAN - ${new Date().toLocaleDateString()}`;
+    const timestamp = `Generated: ${new Date().toLocaleString()}`;
+    const separator = '='.repeat(80);
+    
+    let content = `${separator}\n${title}\n${timestamp}\n${separator}\n\n`;
+    
+    recommendations.forEach((rec, index) => {
+      content += `\n${index + 1}. TRAINSET: ${rec.trainId} (${rec.trainName})\n`;
+      content += `   ${'—'.repeat(75)}\n`;
+      content += `   Shift: ${rec.shift}\n`;
+      content += `   Priority: ${rec.priority.toUpperCase()}\n`;
+      content += `   Stabling Position: ${rec.stablingPosition}\n`;
+      content += `   Estimated Duration: ${rec.estimatedDuration}\n`;
+      content += `   AI Confidence: ${(rec.confidence * 100).toFixed(1)}%\n`;
+      content += `   Status: ${rec.canProceed ? 'READY FOR INDUCTION' : 'BLOCKED'}\n`;
+      content += `   \n`;
+      content += `   Assigned Crew:\n`;
+      rec.crew.forEach((member: string) => {
+        content += `   • ${member}\n`;
+      });
+      content += `   \n`;
+      content += `   Last Maintenance: ${rec.lastMaintenance}\n`;
+      content += `   Fitness Certificate Expiry: ${rec.fitnessExpiry}\n`;
+      content += `   \n`;
+      content += `   AI Reasoning:\n   ${rec.reasoning}\n`;
+      
+      if (rec.blockingIssues && rec.blockingIssues.length > 0) {
+        content += `   \n`;
+        content += `   ⚠️  BLOCKING ISSUES:\n`;
+        rec.blockingIssues.forEach((issue: string) => {
+          content += `   • ${issue}\n`;
+        });
+      }
+      content += `\n`;
+    });
+    
+    content += `\n${separator}\n`;
+    content += `Total Trainsets: ${recommendations.length}\n`;
+    content += `Ready for Induction: ${recommendations.filter(r => r.canProceed).length}\n`;
+    content += `Blocked: ${recommendations.filter(r => !r.canProceed).length}\n`;
+    content += `Average AI Confidence: ${(recommendations.reduce((sum, r) => sum + r.confidence, 0) / recommendations.length * 100).toFixed(1)}%\n`;
+    content += `${separator}\n`;
+
+    // Download as text file
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `induction_plan_${new Date().toISOString().split('T')[0]}.txt`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast.success('Induction plan document downloaded successfully');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-cockpit p-6 space-y-6">
       
@@ -156,11 +294,27 @@ const InductionPlan: React.FC = () => {
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 flex-wrap">
           <Badge variant="outline" className="glass-card border-primary text-primary">
             <Brain className="w-3 h-3 mr-1" />
             AI Model v2.1.0 (Gemini Flash)
           </Badge>
+          <Button 
+            variant="outline"
+            onClick={downloadInductionPlanCSV}
+            disabled={recommendations.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download CSV
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={downloadInductionPlanPDF}
+            disabled={recommendations.length === 0}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Download Report
+          </Button>
           <Button 
             variant="neural" 
             onClick={handleGeneratePlan}
