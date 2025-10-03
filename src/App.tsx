@@ -30,6 +30,8 @@ import UserManagement from "./pages/UserManagement";
 import Feedback from "./pages/Feedback";
 import Support from "./pages/Support";
 import AuditTrail from "./pages/AuditTrail";
+import Incidents from "./pages/Incidents";
+import AccuracyDashboard from "./pages/AccuracyDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -94,6 +96,7 @@ const App = () => {
                 <Route path="/stabling-geometry" element={<StablingGeometry />} />
                 <Route path="/staff-availability" element={<StaffAvailability />} />
                 <Route path="/reports-analytics" element={<ReportsAnalytics />} />
+                <Route path="/performance" element={<Performance />} />
                 <Route path="/algorithm-rules" element={<AlgorithmRules />} />
                 <Route path="/user-management" element={<UserManagement />} />
                 <Route path="/feedback" element={<Feedback />} />
@@ -102,6 +105,8 @@ const App = () => {
                 <Route path="/data-entry" element={<DataEntry />} />
                 <Route path="/outcome-tracker" element={<OutcomeTracker />} />
                 <Route path="/audit-trail" element={<AuditTrail />} />
+                <Route path="/incidents" element={<Incidents />} />
+                <Route path="/accuracy-dashboard" element={<AccuracyDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

@@ -12,6 +12,9 @@ verify_jwt = false
 [functions.enhanced-data-seeder]
 verify_jwt = false
 
+[functions.scenario-simulator]
+verify_jwt = false
+
 [functions.ai-recommendation-generator]
 verify_jwt = false
 

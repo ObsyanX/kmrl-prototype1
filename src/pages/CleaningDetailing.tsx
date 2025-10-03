@@ -1,300 +1,197 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Sparkles, Calendar, CheckCircle, Clock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Calendar, Clock, Users, Wrench, Plus, CheckCircle, PlayCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const CleaningDetailing: React.FC = () => {
-  const [isScheduleModalOpen, setIsScheduleModalOpen] = useState(false);
-  
-  const cleaningBays = [
-    { id: 'Bay-1', capacity: 1, status: 'occupied', currentTrain: 'T03', jobType: 'Deep Cleaning', progress: 75, estimatedCompletion: '14:30' },
-    { id: 'Bay-2', capacity: 1, status: 'available', currentTrain: null, jobType: null, progress: 0, estimatedCompletion: null },
-    { id: 'Bay-3', capacity: 1, status: 'scheduled', currentTrain: 'T07', jobType: 'Standard Interior', progress: 0, estimatedCompletion: '16:00' },
-    { id: 'Bay-4', capacity: 1, status: 'maintenance', currentTrain: null, jobType: null, progress: 0, estimatedCompletion: null },
-  ];
+  const { toast } = useToast();
+  const [schedules, setSchedules] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const availableTrains = ['T01', 'T05', 'T09', 'T12', 'T15', 'T18'];
-  const availableStaff = ['Crew A (4 members)', 'Crew B (3 members)', 'Crew C (5 members)'];
-  const cleaningTypes = ['Standard Interior', 'Deep Cleaning', 'Exterior Wash', 'Wrap Detailing'];
+  useEffect(() => {
+    fetchCleaningSchedules();
+  }, []);
 
-  const scheduledJobs = [
-    { id: 1, train: 'T03', bay: 'Bay-1', type: 'Deep Cleaning', crew: 'Crew A', startTime: '12:00', duration: '3h', status: 'in-progress' },
-    { id: 2, train: 'T07', bay: 'Bay-3', type: 'Standard Interior', crew: 'Crew B', startTime: '15:00', duration: '2h', status: 'scheduled' },
-    { id: 3, train: 'T12', bay: 'Bay-2', type: 'Exterior Wash', crew: 'Crew C', startTime: '17:00', duration: '1h', status: 'scheduled' },
-  ];
+  const fetchCleaningSchedules = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('cleaning_schedules')
+        .select('*')
+        .gte('scheduled_date', new Date().toISOString().split('T')[0])
+        .order('scheduled_date', { ascending: true })
+        .order('scheduled_time', { ascending: true });
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'occupied': return 'destructive';
-      case 'scheduled': return 'warning';
-      case 'available': return 'success';
-      case 'maintenance': return 'secondary';
-      default: return 'secondary';
+      if (error) throw error;
+      setSchedules(data || []);
+    } catch (error) {
+      console.error('Error fetching cleaning schedules:', error);
+      toast({
+        title: "Error Loading Data",
+        description: "Failed to fetch cleaning schedules",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getJobStatusColor = (status: string) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'in-progress': return 'warning';
-      case 'scheduled': return 'default';
-      case 'completed': return 'success';
-      default: return 'secondary';
+      case 'completed': return 'bg-green-500';
+      case 'in_progress': return 'bg-blue-500';
+      case 'scheduled': return 'bg-yellow-500';
+      case 'cancelled': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'deep': return 'bg-purple-500';
+      case 'routine': return 'bg-blue-500';
+      case 'emergency': return 'bg-red-500';
+      default: return 'bg-gray-500';
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-glow">Depot Bay & Cleaning Schedule</h1>
-          <p className="text-muted-foreground">Manage physical and human resources for interior cleaning</p>
-        </div>
-        <Dialog open={isScheduleModalOpen} onOpenChange={setIsScheduleModalOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="w-4 h-4" />
-              Schedule Cleaning
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="glass-card">
-            <DialogHeader>
-              <DialogTitle>Schedule New Cleaning Job</DialogTitle>
-              <DialogDescription>
-                Select train, cleaning type, and assign crew for the cleaning job.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Select Train</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Choose available train" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableTrains.map((train) => (
-                      <SelectItem key={train} value={train}>{train}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Cleaning Type</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select service type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cleaningTypes.map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Assign Crew</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select available crew" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableStaff.map((crew) => (
-                      <SelectItem key={crew} value={crew}>{crew}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex gap-2 pt-4">
-                <Button onClick={() => setIsScheduleModalOpen(false)} className="flex-1">
-                  Schedule Job
-                </Button>
-                <Button variant="outline" onClick={() => setIsScheduleModalOpen(false)}>
-                  Cancel
-                </Button>
-              </div>
+    <div className="min-h-screen bg-gradient-cockpit p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-glow mb-2">Cleaning & Detailing Management</h1>
+        <p className="text-muted-foreground">Schedule and track trainset cleaning operations</p>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="glass-card border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Scheduled</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-glow">{schedules.length}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">In Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-blue-500">
+              {schedules.filter(s => s.status === 'in_progress').length}
             </div>
-          </DialogContent>
-        </Dialog>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Completed Today</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-green-500">
+              {schedules.filter(s => s.status === 'completed' && s.scheduled_date === new Date().toISOString().split('T')[0]).length}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card border-primary/20">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Avg Quality Score</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-glow">
+              {schedules.filter(s => s.quality_score).length > 0
+                ? (schedules.filter(s => s.quality_score).reduce((sum, s) => sum + s.quality_score, 0) / 
+                   schedules.filter(s => s.quality_score).length).toFixed(1)
+                : 'N/A'}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Bay Status Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {cleaningBays.map((bay) => (
-          <Card key={bay.id} className="glass-card">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">{bay.id}</CardTitle>
-                <Badge variant={getStatusColor(bay.status)}>
-                  {bay.status.replace('-', ' ')}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {bay.currentTrain && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Current Train</div>
-                  <div className="font-semibold text-lg">{bay.currentTrain}</div>
-                </div>
-              )}
-              
-              {bay.jobType && (
-                <div>
-                  <div className="text-sm text-muted-foreground">Job Type</div>
-                  <div className="font-medium">{bay.jobType}</div>
-                </div>
-              )}
-              
-              {bay.status === 'occupied' && bay.progress > 0 && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Progress</span>
-                    <span className="font-medium">{bay.progress}%</span>
-                  </div>
-                  <div className="w-full bg-secondary rounded-full h-2">
-                    <div 
-                      className="bg-primary h-2 rounded-full transition-all duration-500 shimmer-animation"
-                      style={{ width: `${bay.progress}%` }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <Clock className="w-3 h-3" />
-                    Est. completion: {bay.estimatedCompletion}
-                  </div>
-                </div>
-              )}
-              
-              {bay.status === 'available' && (
-                <div className="text-center py-4">
-                  <CheckCircle className="w-8 h-8 text-success mx-auto mb-2" />
-                  <div className="text-sm text-success">Ready for next job</div>
-                </div>
-              )}
-              
-              {bay.status === 'maintenance' && (
-                <div className="text-center py-4">
-                  <Wrench className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <div className="text-sm text-muted-foreground">Under maintenance</div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Real-time Gantt Chart */}
-      <Card className="glass-card">
+      {/* Cleaning Schedule List */}
+      <Card className="glass-card border-primary/20">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="text-glow flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            Live Cleaning Schedule
+            Upcoming Cleaning Schedule
           </CardTitle>
-          <CardDescription>Real-time Gantt chart with progress animation</CardDescription>
+          <CardDescription>Trainset cleaning and detailing operations</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {/* Timeline Header */}
-            <div className="grid grid-cols-12 gap-2 text-xs text-muted-foreground border-b border-primary/20 pb-2">
-              <div className="col-span-2">Train/Bay</div>
-              <div className="col-span-2">Service Type</div>
-              <div className="col-span-8 flex justify-between">
-                <span>12:00</span><span>14:00</span><span>16:00</span><span>18:00</span><span>20:00</span>
-              </div>
-            </div>
-            
-            {/* Schedule Rows */}
-            {scheduledJobs.map((job) => (
-              <div key={job.id} className="grid grid-cols-12 gap-2 items-center py-3 border-b border-primary/10">
-                <div className="col-span-2">
-                  <div className="font-medium">{job.train}</div>
-                  <div className="text-xs text-muted-foreground">{job.bay}</div>
-                </div>
-                <div className="col-span-2">
-                  <div className="text-sm">{job.type}</div>
-                  <div className="text-xs text-muted-foreground">{job.crew}</div>
-                </div>
-                <div className="col-span-8 relative">
-                  <div className="h-8 bg-secondary/20 rounded-md relative overflow-hidden">
-                    <div 
-                      className={`h-full rounded-md flex items-center px-2 text-xs font-medium transition-all duration-500 ${
-                        job.status === 'in-progress' 
-                          ? 'bg-warning shimmer-animation' 
-                          : 'bg-primary/20'
-                      }`}
-                      style={{ width: '33%', marginLeft: '25%' }}
-                    >
-                      <Badge variant={getJobStatusColor(job.status)} className="text-xs">
-                        {job.status === 'in-progress' ? (
-                          <PlayCircle className="w-3 h-3 mr-1" />
-                        ) : (
-                          <Clock className="w-3 h-3 mr-1" />
+          {loading ? (
+            <div className="text-center py-12 text-muted-foreground">Loading schedules...</div>
+          ) : schedules.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">No cleaning schedules found</div>
+          ) : (
+            <div className="space-y-4">
+              {schedules.map((schedule) => (
+                <div
+                  key={schedule.id}
+                  className="p-4 rounded-lg border border-primary/30 bg-background/50 hover:bg-background/80 transition-all"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Sparkles className="w-5 h-5 text-primary" />
+                        <span className="font-bold text-glow">{schedule.trainset_id}</span>
+                        <Badge className={getStatusColor(schedule.status)}>
+                          {schedule.status.replace('_', ' ')}
+                        </Badge>
+                        <Badge className={getTypeColor(schedule.cleaning_type)}>
+                          {schedule.cleaning_type}
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          {new Date(schedule.scheduled_date).toLocaleDateString()}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {schedule.scheduled_time}
+                        </div>
+                        {schedule.bay_number && (
+                          <div>Bay: {schedule.bay_number}</div>
                         )}
-                        {job.status.replace('-', ' ')}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {job.startTime} - {job.duration}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                      </div>
 
-      {/* Staff Allocation */}
-      <Card className="glass-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Crew Availability
-          </CardTitle>
-          <CardDescription>Current shift manpower allocation</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="glass-card p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Crew A</h3>
-                <Badge variant="destructive">Busy</Badge>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <div>4 members • Deep Cleaning Specialists</div>
-                <div>Currently: Bay-1 (T03)</div>
-                <div>Available: 15:30</div>
-              </div>
+                      {schedule.assigned_crew && schedule.assigned_crew.length > 0 && (
+                        <div className="mt-2 text-sm">
+                          <span className="text-muted-foreground">Crew:</span>{' '}
+                          {schedule.assigned_crew.join(', ')}
+                        </div>
+                      )}
+
+                      {schedule.notes && (
+                        <div className="mt-2 text-sm text-muted-foreground italic">
+                          {schedule.notes}
+                        </div>
+                      )}
+                    </div>
+
+                    {schedule.quality_score && (
+                      <div className="text-center ml-4">
+                        <div className="text-2xl font-bold text-glow">{schedule.quality_score}</div>
+                        <div className="text-xs text-muted-foreground">/ 10</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {schedule.status === 'completed' && schedule.completion_time && (
+                    <div className="flex items-center gap-2 text-sm text-green-500 pt-2 border-t border-primary/20">
+                      <CheckCircle className="w-4 h-4" />
+                      Completed at {new Date(schedule.completion_time).toLocaleString()}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
-            
-            <div className="glass-card p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Crew B</h3>
-                <Badge variant="warning">Scheduled</Badge>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <div>3 members • Standard Cleaning</div>
-                <div>Next: Bay-3 (T07) at 15:00</div>
-                <div>Available: Now</div>
-              </div>
-            </div>
-            
-            <div className="glass-card p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Crew C</h3>
-                <Badge variant="success">Available</Badge>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <div>5 members • Exterior & Detailing</div>
-                <div>Next: Bay-2 (T12) at 17:00</div>
-                <div>Available: Now</div>
-              </div>
-            </div>
-          </div>
+          )}
         </CardContent>
       </Card>
     </div>
