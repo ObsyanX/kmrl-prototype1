@@ -25,6 +25,7 @@ import JobCardStatus from "./pages/JobCardStatus";
 import AlgorithmRules from "./pages/AlgorithmRules";
 import DataSources from "./pages/DataSources";
 import DataEntry from "./pages/DataEntry";
+import OutcomeTracker from "./pages/OutcomeTracker";
 import UserManagement from "./pages/UserManagement";
 import Feedback from "./pages/Feedback";
 import Support from "./pages/Support";
@@ -99,6 +100,7 @@ const App = () => {
                 <Route path="/support" element={<Support />} />
                 <Route path="/data-sources" element={<DataSources />} />
                 <Route path="/data-entry" element={<DataEntry />} />
+                <Route path="/outcome-tracker" element={<OutcomeTracker />} />
                 <Route path="/audit-trail" element={<AuditTrail />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>

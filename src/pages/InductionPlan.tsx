@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useOptimization } from '@/hooks/useOptimization';
+import { useAdvancedOptimization } from '@/hooks/useAdvancedOptimization';
 import { useTrainsets } from '@/hooks/useTrainsets';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,6 +23,7 @@ const InductionPlan: React.FC = () => {
   
   const { trainsets, loading: trainsetsLoading } = useTrainsets();
   const { planInduction, getAIRecommendation } = useOptimization();
+  const { recordOutcome, analyzePatterns } = useAdvancedOptimization();
 
   // Fetch induction plans on mount
   useEffect(() => {
@@ -128,6 +130,10 @@ const InductionPlan: React.FC = () => {
     if (!selectedRecommendation) return;
 
     try {
+      // Record the planned induction in database
+      const plannedInductionTime = new Date();
+      plannedInductionTime.setHours(6, 0, 0, 0); // Next morning 6 AM
+
       const { error } = await supabase
         .from('trainsets')
         .update({ 
@@ -135,12 +141,53 @@ const InductionPlan: React.FC = () => {
           metadata: {
             last_induction_plan: selectedRecommendation,
             operational_notes: operationalNotes,
-            approved_at: new Date().toISOString()
+            approved_at: new Date().toISOString(),
+            planned_induction_time: plannedInductionTime.toISOString(),
           }
         })
         .eq('id', selectedRecommendation.id);
 
       if (error) throw error;
+
+      // Record initial outcome for future learning (will be updated with actual data)
+      try {
+        // Get current optimization record
+        const { data: latestOptimization } = await supabase
+          .from('optimization_history')
+          .select('id')
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const outcome = {
+          optimization_id: latestOptimization?.id || '',
+          trainset_id: selectedRecommendation.id,
+          planned_induction_time: plannedInductionTime.toISOString(),
+          actual_induction_time: plannedInductionTime.toISOString(), // Will be updated later
+          predicted_duration_minutes: parseInt(selectedRecommendation.estimatedDuration) || 135,
+          actual_duration_minutes: 0, // To be filled when actual induction happens
+          weather_impact_predicted: 5,
+          weather_impact_actual: 0,
+          congestion_impact_predicted: 3,
+          congestion_impact_actual: 0,
+          predicted_conflicts: selectedRecommendation.blockingIssues?.length || 0,
+          actual_conflicts: 0,
+          punctuality_achieved: false, // To be updated
+          deviation_minutes: 0,
+          success_score: 0,
+          learning_data: {
+            ai_confidence: selectedRecommendation.confidence,
+            approved_by_user: true,
+            operational_notes: operationalNotes,
+            status: 'planned',
+          }
+        };
+
+        await recordOutcome(outcome);
+      } catch (outcomeError) {
+        console.error('Failed to record outcome:', outcomeError);
+        // Don't block approval if outcome recording fails
+      }
 
       toast.success(`Induction plan approved for ${selectedRecommendation.id}`);
       setIsSubmitModalOpen(false);
