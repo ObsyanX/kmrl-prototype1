@@ -11,7 +11,23 @@ import {
   Activity,
   Shield,
   MapPin,
-  Sparkles
+  Sparkles,
+  FileText,
+  BarChart3,
+  Wrench,
+  CalendarDays,
+  Database,
+  ClipboardList,
+  MessageSquare,
+  TrendingUp,
+  Code,
+  Settings,
+  HelpCircle,
+  Warehouse,
+  Sparkle,
+  Target,
+  TestTube,
+  Scale
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -22,8 +38,10 @@ import LiveStatusBoard from '@/components/realtime/LiveStatusBoard';
 import MaintenanceScheduler from '@/components/maintenance/MaintenanceScheduler';
 import StaffScheduler from '@/components/staff/StaffScheduler';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const { trainsets, loading, fetchTrainsets } = useTrainsets();
   const { runOptimization, isOptimizing, optimizationResult, getAIRecommendation } = useOptimization();
@@ -271,32 +289,155 @@ const Dashboard = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Quick Actions */}
-      <Card className="glass-card border-primary/20">
-        <CardHeader>
-          <CardTitle className="text-glow">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button variant="neural" className="h-20 flex flex-col gap-2">
-              <Brain className="w-5 h-5" />
-              <span className="text-xs">Run Simulation</span>
-            </Button>
-            <Button variant="hologram" className="h-20 flex flex-col gap-2">
-              <Train className="w-5 h-5" />
-              <span className="text-xs">Fleet Management</span>
-            </Button>
-            <Button variant="cockpit" className="h-20 flex flex-col gap-2">
-              <Users className="w-5 h-5" />
-              <span className="text-xs">Staff Schedule</span>
-            </Button>
-            <Button variant="outline" className="h-20 flex flex-col gap-2">
-              <Shield className="w-5 h-5" />
-              <span className="text-xs">View Audit Trail</span>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Navigation Grid - All Pages */}
+      <div className="space-y-6">
+        {/* Operations & Planning */}
+        <Card className="glass-card border-primary/20">
+          <CardHeader>
+            <CardTitle className="text-glow">Operations & Planning</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/induction-plan')}>
+                <CalendarDays className="w-5 h-5" />
+                <span className="text-xs text-center">Induction Plan</span>
+              </Button>
+              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/fleet-status')}>
+                <Train className="w-5 h-5" />
+                <span className="text-xs text-center">Fleet Status</span>
+              </Button>
+              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/simulator')}>
+                <TestTube className="w-5 h-5" />
+                <span className="text-xs text-center">Simulator</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/staff-availability')}>
+                <Users className="w-5 h-5" />
+                <span className="text-xs text-center">Staff Availability</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/stabling-geometry')}>
+                <Warehouse className="w-5 h-5" />
+                <span className="text-xs text-center">Stabling Geometry</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/outcome-tracker')}>
+                <Target className="w-5 h-5" />
+                <span className="text-xs text-center">Outcome Tracker</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Maintenance & Compliance */}
+        <Card className="glass-card border-accent/20">
+          <CardHeader>
+            <CardTitle className="text-glow">Maintenance & Compliance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/maintenance')}>
+                <Wrench className="w-5 h-5" />
+                <span className="text-xs text-center">Maintenance</span>
+              </Button>
+              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/fitness-certificates')}>
+                <FileText className="w-5 h-5" />
+                <span className="text-xs text-center">Fitness Certificates</span>
+              </Button>
+              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/job-card-status')}>
+                <ClipboardList className="w-5 h-5" />
+                <span className="text-xs text-center">Job Card Status</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/cleaning-detailing')}>
+                <Sparkle className="w-5 h-5" />
+                <span className="text-xs text-center">Cleaning & Detailing</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/mileage-balancing')}>
+                <Scale className="w-5 h-5" />
+                <span className="text-xs text-center">Mileage Balancing</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/branding-sla')}>
+                <FileText className="w-5 h-5" />
+                <span className="text-xs text-center">Branding SLA</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Analytics & Performance */}
+        <Card className="glass-card border-success/20">
+          <CardHeader>
+            <CardTitle className="text-glow">Analytics & Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/reports-analytics')}>
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs text-center">Reports & Analytics</span>
+              </Button>
+              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/accuracy-dashboard')}>
+                <TrendingUp className="w-5 h-5" />
+                <span className="text-xs text-center">Accuracy Dashboard</span>
+              </Button>
+              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/performance')}>
+                <Activity className="w-5 h-5" />
+                <span className="text-xs text-center">Performance</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/incidents')}>
+                <AlertTriangle className="w-5 h-5" />
+                <span className="text-xs text-center">Incidents</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/audit-trail')}>
+                <Shield className="w-5 h-5" />
+                <span className="text-xs text-center">Audit Trail</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Data & Configuration */}
+        <Card className="glass-card border-warning/20">
+          <CardHeader>
+            <CardTitle className="text-glow">Data & Configuration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/data-sources')}>
+                <Database className="w-5 h-5" />
+                <span className="text-xs text-center">Data Sources</span>
+              </Button>
+              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/data-entry')}>
+                <ClipboardList className="w-5 h-5" />
+                <span className="text-xs text-center">Data Entry</span>
+              </Button>
+              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/algorithm-rules')}>
+                <Code className="w-5 h-5" />
+                <span className="text-xs text-center">Algorithm & Rules</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/user-management')}>
+                <Users className="w-5 h-5" />
+                <span className="text-xs text-center">User Management</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Support & Feedback */}
+        <Card className="glass-card border-muted/20">
+          <CardHeader>
+            <CardTitle className="text-glow">Support & Feedback</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/support')}>
+                <HelpCircle className="w-5 h-5" />
+                <span className="text-xs text-center">Support</span>
+              </Button>
+              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/feedback')}>
+                <MessageSquare className="w-5 h-5" />
+                <span className="text-xs text-center">Feedback</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
