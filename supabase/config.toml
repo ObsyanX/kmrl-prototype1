@@ -3,6 +3,15 @@ project_id = "gnywoydgedpvolivzqwj"
 [functions.optimization-engine]
 verify_jwt = false
 
+[functions.hierarchical-optimizer]
+verify_jwt = false
+
+[functions.nightly-induction-scheduler]
+verify_jwt = false
+
+[functions.enhanced-data-seeder]
+verify_jwt = false
+
 [functions.ai-recommendation-generator]
 verify_jwt = false
 
