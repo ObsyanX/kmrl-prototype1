@@ -954,13 +954,17 @@ export type Database = {
         Row: {
           battery_level: number | null
           branding_contract_id: string | null
+          component_health_score: number | null
           created_at: string
           current_location: string | null
           current_stabling_position: string | null
           fitness_certificate_expiry: string | null
+          historical_performance: Json | null
           id: string
+          iot_sensor_alerts: Json | null
           last_cleaning_date: string | null
           last_maintenance_date: string | null
+          last_service_date: string | null
           metadata: Json | null
           name: string
           next_maintenance_date: string | null
@@ -972,13 +976,17 @@ export type Database = {
         Insert: {
           battery_level?: number | null
           branding_contract_id?: string | null
+          component_health_score?: number | null
           created_at?: string
           current_location?: string | null
           current_stabling_position?: string | null
           fitness_certificate_expiry?: string | null
+          historical_performance?: Json | null
           id: string
+          iot_sensor_alerts?: Json | null
           last_cleaning_date?: string | null
           last_maintenance_date?: string | null
+          last_service_date?: string | null
           metadata?: Json | null
           name: string
           next_maintenance_date?: string | null
@@ -990,13 +998,17 @@ export type Database = {
         Update: {
           battery_level?: number | null
           branding_contract_id?: string | null
+          component_health_score?: number | null
           created_at?: string
           current_location?: string | null
           current_stabling_position?: string | null
           fitness_certificate_expiry?: string | null
+          historical_performance?: Json | null
           id?: string
+          iot_sensor_alerts?: Json | null
           last_cleaning_date?: string | null
           last_maintenance_date?: string | null
+          last_service_date?: string | null
           metadata?: Json | null
           name?: string
           next_maintenance_date?: string | null

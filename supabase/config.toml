@@ -38,3 +38,12 @@ verify_jwt = false
 
 [functions.data-seeder]
 verify_jwt = false
+
+[functions.train-explainer]
+verify_jwt = false
+
+[functions.fleet-analytics]
+verify_jwt = false
+
+[functions.ml-predictor]
+verify_jwt = false
