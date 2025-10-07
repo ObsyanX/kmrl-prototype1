@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Database, FileText, Cloud, TrendingUp, Calendar, Activity } from 'lucide-react';
+import { Database, FileText, Cloud, TrendingUp, Calendar, Activity, Upload } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,9 @@ import { supabase } from '@/integrations/supabase/client';
 const DataEntry: React.FC = () => {
   const [isSeeding, setIsSeeding] = useState(false);
   const [seedResults, setSeedResults] = useState<any>(null);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvPreview, setCsvPreview] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
 
   // Calendar Event Form State
   const [eventForm, setEventForm] = useState({
@@ -106,6 +109,59 @@ const DataEntry: React.FC = () => {
     }
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.name.endsWith('.csv')) {
+        toast.error('Please upload a CSV file');
+        return;
+      }
+      
+      setCsvFile(file);
+      
+      // Read first 10 lines for preview
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        const lines = text.split('\n').slice(0, 10).join('\n');
+        setCsvPreview(lines);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleCsvUpload = async () => {
+    if (!csvFile) {
+      toast.error('Please select a CSV file');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const csvContent = event.target?.result as string;
+        
+        const { data, error } = await supabase.functions.invoke('enhanced-data-seeder', {
+          body: { csvContent }
+        });
+
+        if (error) throw error;
+
+        setSeedResults(data);
+        toast.success(`Successfully uploaded CSV: ${data.trainsetsCreated} trainsets created`);
+        setCsvFile(null);
+        setCsvPreview('');
+      };
+      reader.readAsText(csvFile);
+    } catch (error) {
+      console.error('CSV upload error:', error);
+      toast.error('Failed to upload CSV file');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-cockpit p-6 space-y-6">
       <div>
@@ -115,12 +171,86 @@ const DataEntry: React.FC = () => {
         </p>
       </div>
 
-      <Tabs defaultValue="seed" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="csv" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="csv">CSV Upload</TabsTrigger>
           <TabsTrigger value="seed">Data Seeding</TabsTrigger>
           <TabsTrigger value="calendar">Calendar Events</TabsTrigger>
           <TabsTrigger value="iot">IoT Sensors</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="csv" className="space-y-4">
+          <Card className="glass-card border-primary/20">
+            <CardHeader>
+              <CardTitle className="text-glow flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                Bulk CSV Upload
+              </CardTitle>
+              <CardDescription>
+                Upload trainset data from CSV file (supports trainsets, maintenance, certificates, etc.)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="csv-file">Select CSV File</Label>
+                <Input
+                  id="csv-file"
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  className="cursor-pointer"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Expected format: train_id, name, status, total_mileage, battery_level, etc.
+                </p>
+              </div>
+
+              {csvPreview && (
+                <Card className="bg-background/50">
+                  <CardHeader>
+                    <CardTitle className="text-sm">CSV Preview (First 10 lines)</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="text-xs overflow-auto whitespace-pre-wrap font-mono">
+                      {csvPreview}
+                    </pre>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Button
+                onClick={handleCsvUpload}
+                disabled={!csvFile || isUploading}
+                className="w-full"
+              >
+                {isUploading ? (
+                  <>
+                    <Database className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload CSV
+                  </>
+                )}
+              </Button>
+
+              {seedResults && (
+                <Card className="bg-background/50">
+                  <CardHeader>
+                    <CardTitle className="text-sm">Upload Results</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="text-xs overflow-auto">
+                      {JSON.stringify(seedResults, null, 2)}
+                    </pre>
+                  </CardContent>
+                </Card>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="seed" className="space-y-4">
           <Card className="glass-card border-primary/20">
