@@ -47,3 +47,6 @@ verify_jwt = false
 
 [functions.ml-predictor]
 verify_jwt = false
+
+[functions.csv-importer]
+verify_jwt = false

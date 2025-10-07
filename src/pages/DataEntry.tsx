@@ -142,14 +142,14 @@ const DataEntry: React.FC = () => {
       reader.onload = async (event) => {
         const csvContent = event.target?.result as string;
         
-        const { data, error } = await supabase.functions.invoke('enhanced-data-seeder', {
+        const { data, error } = await supabase.functions.invoke('csv-importer', {
           body: { csvContent }
         });
 
         if (error) throw error;
 
         setSeedResults(data);
-        toast.success(`Successfully uploaded CSV: ${data.trainsetsCreated} trainsets created`);
+        toast.success(`Successfully uploaded CSV: ${data.results.trainsetsCreated} trainsets created`);
         setCsvFile(null);
         setCsvPreview('');
       };
@@ -187,7 +187,7 @@ const DataEntry: React.FC = () => {
                 Bulk CSV Upload
               </CardTitle>
               <CardDescription>
-                Upload trainset data from CSV file (supports trainsets, maintenance, certificates, etc.)
+                Upload trainset data from CSV file with format: TrainID,Fitness_Rolling,Fitness_Signal,Fitness_Telecom,JobCard_Open,Mileage_km,Branding_Contract,Branding_Hours_Current,Branding_Hours_Required,Cleaning_Hours_Req,Home_Bay
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -201,7 +201,7 @@ const DataEntry: React.FC = () => {
                   className="cursor-pointer"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Expected format: train_id, name, status, total_mileage, battery_level, etc.
+                  Required columns: TrainID, Fitness_Rolling, Fitness_Signal, Fitness_Telecom, JobCard_Open, Mileage_km, Branding_Contract, Branding_Hours_Current, Branding_Hours_Required, Cleaning_Hours_Req, Home_Bay
                 </p>
               </div>
 
