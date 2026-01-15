@@ -35,10 +35,10 @@ const FitnessCertificates: React.FC = () => {
   const fetchCertificates = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('fitness_certificates')
+      const { data, error } = await (supabase
+        .from('fitness_certificates' as any)
         .select('*')
-        .order('expiry_date', { ascending: true });
+        .order('expiry_date', { ascending: true }) as any);
 
       if (error) throw error;
 

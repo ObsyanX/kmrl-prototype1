@@ -29,11 +29,11 @@ const AccuracyDashboard: React.FC = () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
       
-      const { data, error } = await supabase
-        .from('accuracy_metrics')
+      const { data, error } = await (supabase
+        .from('accuracy_metrics' as any)
         .select('*')
         .gte('metric_date', thirtyDaysAgo.toISOString().split('T')[0])
-        .order('metric_date', { ascending: false });
+        .order('metric_date', { ascending: false }) as any);
 
       if (error) throw error;
 

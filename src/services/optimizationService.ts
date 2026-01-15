@@ -93,7 +93,7 @@ export const optimizationService = {
    */
   async getOptimizationHistory(limit = 10) {
     const { data, error } = await supabase
-      .from('optimization_history')
+      .from('optimization_history' as any)
       .select('*')
       .order('execution_timestamp', { ascending: false })
       .limit(limit);
@@ -107,7 +107,7 @@ export const optimizationService = {
    */
   async getConflicts(resolved?: boolean) {
     let query = supabase
-      .from('decision_conflicts')
+      .from('decision_conflicts' as any)
       .select('*')
       .order('created_at', { ascending: false });
 
@@ -125,7 +125,7 @@ export const optimizationService = {
    */
   async resolveConflict(conflictId: string, resolutionStrategy: string) {
     const { data, error } = await supabase
-      .from('decision_conflicts')
+      .from('decision_conflicts' as any)
       .update({
         resolved: true,
         resolved_at: new Date().toISOString(),
@@ -144,7 +144,7 @@ export const optimizationService = {
    */
   async submitOptimizationFeedback(optimizationId: string, feedbackScore: number, applied: boolean) {
     const { data, error } = await supabase
-      .from('optimization_history')
+      .from('optimization_history' as any)
       .update({
         feedback_score: feedbackScore,
         applied,

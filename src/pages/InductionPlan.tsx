@@ -134,8 +134,8 @@ const InductionPlan: React.FC = () => {
       const plannedInductionTime = new Date();
       plannedInductionTime.setHours(6, 0, 0, 0); // Next morning 6 AM
 
-      const { error } = await supabase
-        .from('trainsets')
+      const { error } = await (supabase
+        .from('trainsets' as any)
         .update({ 
           status: 'operational',
           metadata: {
@@ -145,19 +145,19 @@ const InductionPlan: React.FC = () => {
             planned_induction_time: plannedInductionTime.toISOString(),
           }
         })
-        .eq('id', selectedRecommendation.id);
+        .eq('id', selectedRecommendation.id) as any);
 
       if (error) throw error;
 
       // Record initial outcome for future learning (will be updated with actual data)
       try {
         // Get current optimization record
-        const { data: latestOptimization } = await supabase
-          .from('optimization_history')
+        const { data: latestOptimization } = await (supabase
+          .from('optimization_history' as any)
           .select('id')
           .order('created_at', { ascending: false })
           .limit(1)
-          .maybeSingle();
+          .maybeSingle() as any);
 
         const outcome = {
           optimization_id: latestOptimization?.id || '',
