@@ -21,8 +21,6 @@ import {
   MessageSquare,
   TrendingUp,
   Code,
-  Settings,
-  HelpCircle,
   Warehouse,
   Sparkle,
   Target,
@@ -39,6 +37,7 @@ import MaintenanceScheduler from '@/components/maintenance/MaintenanceScheduler'
 import StaffScheduler from '@/components/staff/StaffScheduler';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -91,7 +90,6 @@ const Dashboard = () => {
   const maintenanceCount = trainsets.filter(t => t.status === 'maintenance').length;
   const fleetAvailability = trainsets.length > 0 ? (operationalCount / trainsets.length) * 100 : 0;
   const criticalIssues = optimizationResult?.summary.critical_issues || 0;
-  const conflictsDetected = optimizationResult?.summary.conflicts_detected || 0;
 
   const metricsData = [
     {
@@ -108,7 +106,7 @@ const Dashboard = () => {
     },
     {
       id: 'operational-trains',
-      title: "Operational Trains", 
+      title: "Operational", 
       value: operationalCount,
       unit: `/${trainsets.length}`,
       change: 0,
@@ -136,7 +134,7 @@ const Dashboard = () => {
       value: criticalIssues,
       unit: "",
       change: criticalIssues > 0 ? -15 : 0,
-      changeLabel: "requires attention", 
+      changeLabel: "attention needed", 
       trend: criticalIssues > 0 ? "up" as const : "stable" as const,
       icon: AlertTriangle,
       category: "safety" as const,
@@ -160,33 +158,67 @@ const Dashboard = () => {
     fitnessExpiry: t.fitness_certificate_expiry ? new Date(t.fitness_certificate_expiry).toLocaleDateString() : 'N/A',
   }));
 
+  // Navigation button component for consistency
+  const NavButton = ({ 
+    icon: Icon, 
+    label, 
+    path, 
+    variant = "outline" 
+  }: { 
+    icon: any; 
+    label: string; 
+    path: string; 
+    variant?: "outline" | "neural" | "hologram" | "cockpit";
+  }) => (
+    <Button 
+      variant={variant} 
+      className={cn(
+        "h-auto min-h-[72px] sm:min-h-[80px] lg:min-h-[88px] flex flex-col gap-1.5 sm:gap-2 p-2 sm:p-3",
+        "touch-manipulation active:scale-95 transition-transform"
+      )}
+      onClick={() => navigate(path)}
+    >
+      <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+      <span className="text-[10px] sm:text-xs text-center leading-tight line-clamp-2">{label}</span>
+    </Button>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-cockpit p-6 space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-glow mb-2">AGAMI - Train Induction Control</h1>
-          <p className="text-muted-foreground">
-            AI-Powered Multi-Objective Optimization • {currentTime.toLocaleString()}
+    <div className="min-h-screen bg-gradient-cockpit p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6">
+      {/* Header Section - Mobile responsive */}
+      <div className="flex flex-col gap-3 sm:gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-glow mb-1">
+            AGAMI Control Center
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+            AI-Powered Optimization • {currentTime.toLocaleTimeString()}
           </p>
         </div>
         
-        <div className="flex items-center gap-4">
-          <Badge variant="outline" className="glass-card border-success text-success">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <Badge variant="outline" className="glass-card border-success text-success text-xs shrink-0">
             <Activity className="w-3 h-3 mr-1" />
-            {operationalCount} / {trainsets.length} Operational
+            {operationalCount}/{trainsets.length}
           </Badge>
-          <Button variant="outline" onClick={handleGetAIInsights}>
-            <Brain className="w-4 h-4 mr-2" />
-            AI Insights
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleGetAIInsights}
+            className="text-xs h-8 sm:h-9"
+          >
+            <Brain className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1.5" />
+            <span className="hidden sm:inline">AI Insights</span>
           </Button>
           <Button 
             variant="neural"
+            size="sm"
             onClick={handleRunOptimization}
             disabled={isOptimizing}
+            className="text-xs h-8 sm:h-9"
           >
-            <Sparkles className="w-4 h-4 mr-2" />
-            {isOptimizing ? 'Optimizing...' : 'Run Optimization'}
+            <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 sm:mr-1.5" />
+            <span className="hidden xs:inline">{isOptimizing ? 'Running...' : 'Optimize'}</span>
           </Button>
         </div>
       </div>
@@ -197,24 +229,22 @@ const Dashboard = () => {
       {/* AI Insights Panel */}
       {aiInsights && (
         <Card className="glass-card border-accent/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-accent" />
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
               AI Recommendations
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-3">{aiInsights.recommendation}</p>
+          <CardContent className="space-y-2 sm:space-y-3">
+            <p className="text-xs sm:text-sm text-muted-foreground">{aiInsights.recommendation}</p>
             {aiInsights.reasoning && (
-              <div className="text-sm text-muted-foreground bg-background/50 p-3 rounded-lg">
+              <div className="text-xs text-muted-foreground bg-background/50 p-2 sm:p-3 rounded-lg">
                 <strong>Reasoning:</strong> {aiInsights.reasoning}
               </div>
             )}
-            <div className="flex items-center gap-2 mt-3">
-              <Badge variant="secondary">
-                Confidence: {Math.round((aiInsights.confidence_score || 0) * 100)}%
-              </Badge>
-            </div>
+            <Badge variant="secondary" className="text-xs">
+              Confidence: {Math.round((aiInsights.confidence_score || 0) * 100)}%
+            </Badge>
           </CardContent>
         </Card>
       )}
@@ -222,218 +252,149 @@ const Dashboard = () => {
       {/* Optimization Results */}
       {optimizationResult && (
         <Card className="glass-card border-primary/30">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" />
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Optimization Results
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="glass-card p-4 rounded-lg">
-                <div className="text-sm text-muted-foreground">Execution Time</div>
-                <div className="text-2xl font-bold">{optimizationResult.execution_time_ms}ms</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 lg:gap-4">
+              <div className="glass-card p-2 sm:p-3 lg:p-4 rounded-lg">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Execution</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{optimizationResult.execution_time_ms}ms</div>
               </div>
-              <div className="glass-card p-4 rounded-lg">
-                <div className="text-sm text-muted-foreground">Trainsets Analyzed</div>
-                <div className="text-2xl font-bold">{optimizationResult.summary.total_trainsets}</div>
+              <div className="glass-card p-2 sm:p-3 lg:p-4 rounded-lg">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Analyzed</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold">{optimizationResult.summary.total_trainsets}</div>
               </div>
-              <div className="glass-card p-4 rounded-lg">
-                <div className="text-sm text-muted-foreground">High Priority</div>
-                <div className="text-2xl font-bold text-warning">{optimizationResult.summary.high_priority}</div>
+              <div className="glass-card p-2 sm:p-3 lg:p-4 rounded-lg">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">High Priority</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-warning">{optimizationResult.summary.high_priority}</div>
               </div>
-              <div className="glass-card p-4 rounded-lg">
-                <div className="text-sm text-muted-foreground">Critical Issues</div>
-                <div className="text-2xl font-bold text-destructive">{optimizationResult.summary.critical_issues}</div>
+              <div className="glass-card p-2 sm:p-3 lg:p-4 rounded-lg">
+                <div className="text-[10px] sm:text-xs text-muted-foreground">Critical</div>
+                <div className="text-lg sm:text-xl lg:text-2xl font-bold text-destructive">{optimizationResult.summary.critical_issues}</div>
               </div>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Main Content Tabs */}
+      {/* Main Content Tabs - Scrollable on mobile */}
       <Tabs defaultValue="fleet" className="w-full">
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-          <TabsTrigger value="fleet" className="flex items-center gap-2">
-            <Train className="h-4 w-4" />
-            Fleet
+        <TabsList className="w-full overflow-x-auto flex justify-start sm:justify-center gap-1 p-1 h-auto">
+          <TabsTrigger value="fleet" className="flex items-center gap-1.5 text-xs sm:text-sm px-3 py-2 shrink-0">
+            <Train className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span>Fleet</span>
           </TabsTrigger>
-          <TabsTrigger value="live" className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" />
-            Live Status
+          <TabsTrigger value="live" className="flex items-center gap-1.5 text-xs sm:text-sm px-3 py-2 shrink-0">
+            <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span>Live</span>
           </TabsTrigger>
-          <TabsTrigger value="maintenance" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Maintenance
+          <TabsTrigger value="maintenance" className="flex items-center gap-1.5 text-xs sm:text-sm px-3 py-2 shrink-0">
+            <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span>Maintenance</span>
           </TabsTrigger>
-          <TabsTrigger value="staff" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Staff
+          <TabsTrigger value="staff" className="flex items-center gap-1.5 text-xs sm:text-sm px-3 py-2 shrink-0">
+            <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span>Staff</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="fleet" className="mt-6">
+        <TabsContent value="fleet" className="mt-4 sm:mt-6">
           <FleetGrid trains={transformedTrainsets} />
         </TabsContent>
 
-        <TabsContent value="live" className="mt-6">
+        <TabsContent value="live" className="mt-4 sm:mt-6">
           <LiveStatusBoard />
         </TabsContent>
 
-        <TabsContent value="maintenance" className="mt-6">
+        <TabsContent value="maintenance" className="mt-4 sm:mt-6">
           <MaintenanceScheduler tasks={[]} />
         </TabsContent>
 
-        <TabsContent value="staff" className="mt-6">
+        <TabsContent value="staff" className="mt-4 sm:mt-6">
           <StaffScheduler staff={[]} />
         </TabsContent>
       </Tabs>
 
       {/* Navigation Grid - All Pages */}
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Operations & Planning */}
         <Card className="glass-card border-primary/20">
-          <CardHeader>
-            <CardTitle className="text-glow">Operations & Planning</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-sm sm:text-base lg:text-lg text-glow">Operations & Planning</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/induction-plan')}>
-                <CalendarDays className="w-5 h-5" />
-                <span className="text-xs text-center">Induction Plan</span>
-              </Button>
-              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/fleet-status')}>
-                <Train className="w-5 h-5" />
-                <span className="text-xs text-center">Fleet Status</span>
-              </Button>
-              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/simulator')}>
-                <TestTube className="w-5 h-5" />
-                <span className="text-xs text-center">Simulator</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/staff-availability')}>
-                <Users className="w-5 h-5" />
-                <span className="text-xs text-center">Staff Availability</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/stabling-geometry')}>
-                <Warehouse className="w-5 h-5" />
-                <span className="text-xs text-center">Stabling Geometry</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/outcome-tracker')}>
-                <Target className="w-5 h-5" />
-                <span className="text-xs text-center">Outcome Tracker</span>
-              </Button>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+              <NavButton icon={CalendarDays} label="Induction Plan" path="/induction-plan" variant="neural" />
+              <NavButton icon={Train} label="Fleet Status" path="/fleet-status" variant="hologram" />
+              <NavButton icon={TestTube} label="Simulator" path="/simulator" variant="cockpit" />
+              <NavButton icon={Users} label="Staff" path="/staff-availability" />
+              <NavButton icon={Warehouse} label="Stabling" path="/stabling-geometry" />
+              <NavButton icon={Target} label="Outcomes" path="/outcome-tracker" />
             </div>
           </CardContent>
         </Card>
 
         {/* Maintenance & Compliance */}
         <Card className="glass-card border-accent/20">
-          <CardHeader>
-            <CardTitle className="text-glow">Maintenance & Compliance</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-sm sm:text-base lg:text-lg text-glow">Maintenance & Compliance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/maintenance')}>
-                <Wrench className="w-5 h-5" />
-                <span className="text-xs text-center">Maintenance</span>
-              </Button>
-              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/fitness-certificates')}>
-                <FileText className="w-5 h-5" />
-                <span className="text-xs text-center">Fitness Certificates</span>
-              </Button>
-              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/job-card-status')}>
-                <ClipboardList className="w-5 h-5" />
-                <span className="text-xs text-center">Job Card Status</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/cleaning-detailing')}>
-                <Sparkle className="w-5 h-5" />
-                <span className="text-xs text-center">Cleaning & Detailing</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/mileage-balancing')}>
-                <Scale className="w-5 h-5" />
-                <span className="text-xs text-center">Mileage Balancing</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/branding-sla')}>
-                <FileText className="w-5 h-5" />
-                <span className="text-xs text-center">Branding SLA</span>
-              </Button>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+              <NavButton icon={Wrench} label="Maintenance" path="/maintenance" variant="neural" />
+              <NavButton icon={FileText} label="Fitness Certs" path="/fitness-certificates" variant="hologram" />
+              <NavButton icon={ClipboardList} label="Job Cards" path="/job-card-status" variant="cockpit" />
+              <NavButton icon={Sparkle} label="Cleaning" path="/cleaning-detailing" />
+              <NavButton icon={Scale} label="Mileage" path="/mileage-balancing" />
+              <NavButton icon={FileText} label="Branding" path="/branding-sla" />
             </div>
           </CardContent>
         </Card>
 
         {/* Analytics & Performance */}
         <Card className="glass-card border-success/20">
-          <CardHeader>
-            <CardTitle className="text-glow">Analytics & Performance</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-sm sm:text-base lg:text-lg text-glow">Analytics & Performance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/reports-analytics')}>
-                <BarChart3 className="w-5 h-5" />
-                <span className="text-xs text-center">Reports & Analytics</span>
-              </Button>
-              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/accuracy-dashboard')}>
-                <TrendingUp className="w-5 h-5" />
-                <span className="text-xs text-center">Accuracy Dashboard</span>
-              </Button>
-              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/performance')}>
-                <Activity className="w-5 h-5" />
-                <span className="text-xs text-center">Performance</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/incidents')}>
-                <AlertTriangle className="w-5 h-5" />
-                <span className="text-xs text-center">Incidents</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/audit-trail')}>
-                <Shield className="w-5 h-5" />
-                <span className="text-xs text-center">Audit Trail</span>
-              </Button>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+              <NavButton icon={BarChart3} label="Reports" path="/reports-analytics" variant="neural" />
+              <NavButton icon={TrendingUp} label="Accuracy" path="/accuracy-dashboard" variant="hologram" />
+              <NavButton icon={Activity} label="Performance" path="/performance" variant="cockpit" />
+              <NavButton icon={AlertTriangle} label="Incidents" path="/incidents" />
+              <NavButton icon={Shield} label="Audit Trail" path="/audit-trail" />
             </div>
           </CardContent>
         </Card>
 
         {/* Data & Configuration */}
         <Card className="glass-card border-warning/20">
-          <CardHeader>
-            <CardTitle className="text-glow">Data & Configuration</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-sm sm:text-base lg:text-lg text-glow">Data & Configuration</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/data-sources')}>
-                <Database className="w-5 h-5" />
-                <span className="text-xs text-center">Data Sources</span>
-              </Button>
-              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/data-entry')}>
-                <ClipboardList className="w-5 h-5" />
-                <span className="text-xs text-center">Data Entry</span>
-              </Button>
-              <Button variant="cockpit" className="h-24 flex flex-col gap-2" onClick={() => navigate('/algorithm-rules')}>
-                <Code className="w-5 h-5" />
-                <span className="text-xs text-center">Algorithm & Rules</span>
-              </Button>
-              <Button variant="outline" className="h-24 flex flex-col gap-2" onClick={() => navigate('/user-management')}>
-                <Users className="w-5 h-5" />
-                <span className="text-xs text-center">User Management</span>
-              </Button>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+              <NavButton icon={Database} label="Data Sources" path="/data-sources" variant="neural" />
+              <NavButton icon={ClipboardList} label="Data Entry" path="/data-entry" variant="hologram" />
+              <NavButton icon={Code} label="Algorithm" path="/algorithm-rules" variant="cockpit" />
+              <NavButton icon={Users} label="Users" path="/user-management" />
             </div>
           </CardContent>
         </Card>
 
         {/* Support & Feedback */}
         <Card className="glass-card border-muted/20">
-          <CardHeader>
-            <CardTitle className="text-glow">Support & Feedback</CardTitle>
+          <CardHeader className="pb-2 sm:pb-3">
+            <CardTitle className="text-sm sm:text-base lg:text-lg text-glow">Support & Feedback</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              <Button variant="neural" className="h-24 flex flex-col gap-2" onClick={() => navigate('/support')}>
-                <HelpCircle className="w-5 h-5" />
-                <span className="text-xs text-center">Support</span>
-              </Button>
-              <Button variant="hologram" className="h-24 flex flex-col gap-2" onClick={() => navigate('/feedback')}>
-                <MessageSquare className="w-5 h-5" />
-                <span className="text-xs text-center">Feedback</span>
-              </Button>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3">
+              <NavButton icon={MessageSquare} label="Feedback" path="/feedback" variant="neural" />
+              <NavButton icon={Brain} label="Support" path="/support" variant="hologram" />
             </div>
           </CardContent>
         </Card>
