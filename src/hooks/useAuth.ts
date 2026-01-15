@@ -60,18 +60,21 @@ export const useAuth = () => {
         .from('profiles' as any)
         .select('employee_id, full_name, department')
         .eq('user_id', userId)
-        .single() as any);
+        .maybeSingle() as any);
 
-      if (profileError) throw profileError;
+      // Only throw if it's a real error, not just "no rows found"
+      if (profileError && profileError.code !== 'PGRST116') {
+        throw profileError;
+      }
 
       const { data: rolesData, error: rolesError } = await (supabase
         .from('user_roles' as any)
         .select('role')
         .eq('user_id', userId) as any);
 
-      if (rolesError) throw rolesError;
-
+      // Roles might not exist for new users, that's ok
       const roles = rolesData?.map((r: any) => r.role) || [];
+      
       setProfile({
         employee_id: profileData?.employee_id || '',
         full_name: profileData?.full_name || '',
@@ -80,6 +83,13 @@ export const useAuth = () => {
       });
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      // Set empty profile so the app can still function
+      setProfile({
+        employee_id: '',
+        full_name: '',
+        department: '',
+        roles: []
+      });
     }
   };
 
