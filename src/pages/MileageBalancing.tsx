@@ -28,10 +28,10 @@ const MileageBalancing: React.FC = () => {
       setLoading(true);
       
       // Fetch mileage records for last 30 days
-      const { data: mileageRecords, error: mileageError } = await supabase
-        .from('mileage_records')
+      const { data: mileageRecords, error: mileageError } = await (supabase
+        .from('mileage_records' as any)
         .select('*')
-        .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
+        .gte('date', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()) as any);
 
       if (mileageError) throw mileageError;
 

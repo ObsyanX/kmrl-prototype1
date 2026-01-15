@@ -30,12 +30,12 @@ const OutcomeTracker: React.FC = () => {
 
   const fetchPendingOutcomes = async () => {
     try {
-      const { data, error } = await supabase
-        .from('operation_outcomes')
+      const { data, error } = await (supabase
+        .from('operation_outcomes' as any)
         .select('*')
         .eq('actual_duration_minutes', 0)
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(50) as any);
 
       if (error) throw error;
       setOutcomes(data || []);
@@ -72,8 +72,8 @@ const OutcomeTracker: React.FC = () => {
         actualData.punctuality_achieved
       );
 
-      const { error } = await supabase
-        .from('operation_outcomes')
+      const { error } = await (supabase
+        .from('operation_outcomes' as any)
         .update({
           actual_induction_time: actualData.actual_induction_time,
           actual_duration_minutes: actualData.actual_duration_minutes,
@@ -95,7 +95,7 @@ const OutcomeTracker: React.FC = () => {
             }
           }
         })
-        .eq('id', selectedOutcome.id);
+        .eq('id', selectedOutcome.id) as any);
 
       if (error) throw error;
 

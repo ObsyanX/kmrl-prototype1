@@ -77,12 +77,12 @@ export const advancedOptimizationService = {
    * Get depot congestion status
    */
   async getDepotCongestion() {
-    const { data, error } = await supabase
-      .from('depot_congestion')
+    const { data, error } = await (supabase
+      .from('depot_congestion' as any)
       .select('*')
       .order('timestamp', { ascending: false })
       .limit(1)
-      .maybeSingle();
+      .maybeSingle() as any);
 
     if (error && error.code !== 'PGRST116') throw error;
     
@@ -97,11 +97,11 @@ export const advancedOptimizationService = {
       };
 
       // Store simulated data
-      await supabase.from('depot_congestion').insert([{
+      await (supabase.from('depot_congestion' as any).insert([{
         ...simulated,
         available_tracks: 20,
         sensor_data: {},
-      }]);
+      }]) as any);
 
       return simulated;
     }
@@ -234,12 +234,12 @@ export const advancedOptimizationService = {
     const startDate = new Date().toISOString().split('T')[0];
     const endDate = new Date(Date.now() + daysAhead * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
-    const { data, error } = await supabase
-      .from('calendar_events')
+    const { data, error } = await (supabase
+      .from('calendar_events' as any)
       .select('*')
       .gte('event_date', startDate)
       .lte('event_date', endDate)
-      .order('event_date', { ascending: true });
+      .order('event_date', { ascending: true }) as any);
 
     if (error) throw error;
     return data;
@@ -257,11 +257,11 @@ export const advancedOptimizationService = {
     fleet_adjustment_required?: boolean;
     notes?: string;
   }) {
-    const { data, error } = await supabase
-      .from('calendar_events')
+    const { data, error } = await (supabase
+      .from('calendar_events' as any)
       .insert([event])
       .select()
-      .single();
+      .single() as any);
 
     if (error) throw error;
     return data;
@@ -273,11 +273,11 @@ export const advancedOptimizationService = {
   async getWeatherHistory(days: number = 30) {
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-    const { data, error } = await supabase
-      .from('weather_data')
+    const { data, error } = await (supabase
+      .from('weather_data' as any)
       .select('*')
       .gte('timestamp', startDate)
-      .order('timestamp', { ascending: false });
+      .order('timestamp', { ascending: false }) as any);
 
     if (error) throw error;
     return data;
@@ -289,11 +289,11 @@ export const advancedOptimizationService = {
   async getOperationOutcomes(days: number = 30) {
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-    const { data, error } = await supabase
-      .from('operation_outcomes')
+    const { data, error } = await (supabase
+      .from('operation_outcomes' as any)
       .select('*')
       .gte('created_at', startDate)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false }) as any);
 
     if (error) throw error;
     return data;

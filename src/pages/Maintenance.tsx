@@ -37,10 +37,10 @@ const Maintenance: React.FC = () => {
   const fetchMaintenanceTasks = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('maintenance_jobs')
+      const { data, error } = await (supabase
+        .from('maintenance_jobs' as any)
         .select('*')
-        .order('scheduled_start', { ascending: true });
+        .order('scheduled_start', { ascending: true }) as any);
 
       if (error) throw error;
 
@@ -82,10 +82,10 @@ const Maintenance: React.FC = () => {
 
   const handleTaskUpdate = async (taskId: string, updates: any) => {
     try {
-      const { error } = await supabase
-        .from('maintenance_jobs')
+      const { error } = await (supabase
+        .from('maintenance_jobs' as any)
         .update(updates)
-        .eq('id', taskId);
+        .eq('id', taskId) as any);
 
       if (error) throw error;
 

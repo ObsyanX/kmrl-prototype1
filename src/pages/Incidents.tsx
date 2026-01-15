@@ -17,10 +17,10 @@ const Incidents: React.FC = () => {
   const fetchIncidents = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('incidents')
+      const { data, error } = await (supabase
+        .from('incidents' as any)
         .select('*')
-        .order('reported_at', { ascending: false });
+        .order('reported_at', { ascending: false }) as any);
 
       if (error) throw error;
       setIncidents(data || []);

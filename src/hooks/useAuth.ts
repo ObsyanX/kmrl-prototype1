@@ -56,26 +56,26 @@ export const useAuth = () => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
+      const { data: profileData, error: profileError } = await (supabase
+        .from('profiles' as any)
         .select('employee_id, full_name, department')
         .eq('user_id', userId)
-        .single();
+        .single() as any);
 
       if (profileError) throw profileError;
 
-      const { data: rolesData, error: rolesError } = await supabase
-        .from('user_roles')
+      const { data: rolesData, error: rolesError } = await (supabase
+        .from('user_roles' as any)
         .select('role')
-        .eq('user_id', userId);
+        .eq('user_id', userId) as any);
 
       if (rolesError) throw rolesError;
 
       const roles = rolesData?.map((r: any) => r.role) || [];
       setProfile({
-        employee_id: profileData.employee_id,
-        full_name: profileData.full_name,
-        department: profileData.department,
+        employee_id: profileData?.employee_id || '',
+        full_name: profileData?.full_name || '',
+        department: profileData?.department || '',
         roles
       });
     } catch (error) {

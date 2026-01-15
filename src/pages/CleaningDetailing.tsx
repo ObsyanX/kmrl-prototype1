@@ -17,12 +17,12 @@ const CleaningDetailing: React.FC = () => {
   const fetchCleaningSchedules = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('cleaning_schedules')
+      const { data, error } = await (supabase
+        .from('cleaning_schedules' as any)
         .select('*')
         .gte('scheduled_date', new Date().toISOString().split('T')[0])
         .order('scheduled_date', { ascending: true })
-        .order('scheduled_time', { ascending: true });
+        .order('scheduled_time', { ascending: true }) as any);
 
       if (error) throw error;
       setSchedules(data || []);

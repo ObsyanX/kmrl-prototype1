@@ -10,88 +10,31 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
       accuracy_metrics: {
         Row: {
-          accuracy_percentage: number | null
-          accurate_predictions: number
-          confidence_score_avg: number | null
-          created_at: string | null
-          detailed_metrics: Json | null
+          accurate_predictions: number | null
+          created_at: string
           id: string
-          metric_date: string
           model_version: string | null
-          prediction_type: string
-          total_predictions: number
+          total_predictions: number | null
         }
         Insert: {
-          accuracy_percentage?: number | null
-          accurate_predictions?: number
-          confidence_score_avg?: number | null
-          created_at?: string | null
-          detailed_metrics?: Json | null
+          accurate_predictions?: number | null
+          created_at?: string
           id?: string
-          metric_date: string
           model_version?: string | null
-          prediction_type: string
-          total_predictions?: number
+          total_predictions?: number | null
         }
         Update: {
-          accuracy_percentage?: number | null
-          accurate_predictions?: number
-          confidence_score_avg?: number | null
-          created_at?: string | null
-          detailed_metrics?: Json | null
+          accurate_predictions?: number | null
+          created_at?: string
           id?: string
-          metric_date?: string
           model_version?: string | null
-          prediction_type?: string
-          total_predictions?: number
-        }
-        Relationships: []
-      }
-      algorithm_configurations: {
-        Row: {
-          config_name: string
-          constraints: Json
-          created_at: string | null
-          created_by: string | null
-          id: string
-          is_active: boolean | null
-          ml_parameters: Json | null
-          thresholds: Json
-          updated_at: string | null
-          version: string
-          weights: Json
-        }
-        Insert: {
-          config_name: string
-          constraints?: Json
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          is_active?: boolean | null
-          ml_parameters?: Json | null
-          thresholds?: Json
-          updated_at?: string | null
-          version: string
-          weights?: Json
-        }
-        Update: {
-          config_name?: string
-          constraints?: Json
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          is_active?: boolean | null
-          ml_parameters?: Json | null
-          thresholds?: Json
-          updated_at?: string | null
-          version?: string
-          weights?: Json
+          total_predictions?: number | null
         }
         Relationships: []
       }
@@ -99,352 +42,249 @@ export type Database = {
         Row: {
           action: string
           created_at: string
+          details: Json | null
+          entity_id: string | null
+          entity_type: string | null
           id: string
-          ip_address: unknown | null
-          new_values: Json | null
-          old_values: Json | null
-          record_id: string | null
-          table_name: string | null
-          user_agent: string | null
           user_id: string | null
         }
         Insert: {
           action: string
           created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
-          ip_address?: unknown | null
-          new_values?: Json | null
-          old_values?: Json | null
-          record_id?: string | null
-          table_name?: string | null
-          user_agent?: string | null
           user_id?: string | null
         }
         Update: {
           action?: string
           created_at?: string
+          details?: Json | null
+          entity_id?: string | null
+          entity_type?: string | null
           id?: string
-          ip_address?: unknown | null
-          new_values?: Json | null
-          old_values?: Json | null
-          record_id?: string | null
-          table_name?: string | null
-          user_agent?: string | null
           user_id?: string | null
         }
         Relationships: []
       }
       branding_contracts: {
         Row: {
-          assigned_trainsets: string[] | null
-          client_name: string
-          contract_end: string
-          contract_start: string
+          contract_name: string
           created_at: string
+          hours_current: number | null
+          hours_required: number | null
           id: string
           priority_level: number | null
-          requirements: Json | null
-          revenue: number | null
-          status: string
-          updated_at: string
+          status: string | null
+          trainset_id: string | null
         }
         Insert: {
-          assigned_trainsets?: string[] | null
-          client_name: string
-          contract_end: string
-          contract_start: string
+          contract_name: string
           created_at?: string
-          id: string
-          priority_level?: number | null
-          requirements?: Json | null
-          revenue?: number | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          assigned_trainsets?: string[] | null
-          client_name?: string
-          contract_end?: string
-          contract_start?: string
-          created_at?: string
+          hours_current?: number | null
+          hours_required?: number | null
           id?: string
           priority_level?: number | null
-          requirements?: Json | null
-          revenue?: number | null
-          status?: string
-          updated_at?: string
+          status?: string | null
+          trainset_id?: string | null
         }
-        Relationships: []
+        Update: {
+          contract_name?: string
+          created_at?: string
+          hours_current?: number | null
+          hours_required?: number | null
+          id?: string
+          priority_level?: number | null
+          status?: string | null
+          trainset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branding_contracts_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       calendar_events: {
         Row: {
-          created_at: string | null
+          created_at: string
           event_date: string
           event_name: string
-          event_type: string | null
+          event_type: string
           expected_demand_factor: number | null
           fleet_adjustment_required: boolean | null
           id: string
           notes: string | null
           ridership_multiplier: number | null
-          updated_at: string | null
         }
         Insert: {
-          created_at?: string | null
+          created_at?: string
           event_date: string
           event_name: string
-          event_type?: string | null
+          event_type: string
           expected_demand_factor?: number | null
           fleet_adjustment_required?: boolean | null
           id?: string
           notes?: string | null
           ridership_multiplier?: number | null
-          updated_at?: string | null
         }
         Update: {
-          created_at?: string | null
+          created_at?: string
           event_date?: string
           event_name?: string
-          event_type?: string | null
+          event_type?: string
           expected_demand_factor?: number | null
           fleet_adjustment_required?: boolean | null
           id?: string
           notes?: string | null
           ridership_multiplier?: number | null
-          updated_at?: string | null
         }
         Relationships: []
       }
       cleaning_schedules: {
         Row: {
-          assigned_crew: string[] | null
-          bay_number: string | null
-          checklist: Json | null
           cleaning_type: string
-          completion_time: string | null
-          created_at: string | null
+          created_at: string
+          hours_required: number | null
           id: string
-          notes: string | null
-          photo_urls: string[] | null
-          quality_score: number | null
-          scheduled_date: string
-          scheduled_time: string
-          status: string
-          trainset_id: string
-          updated_at: string | null
+          scheduled_date: string | null
+          status: string | null
+          trainset_id: string | null
         }
         Insert: {
-          assigned_crew?: string[] | null
-          bay_number?: string | null
-          checklist?: Json | null
-          cleaning_type: string
-          completion_time?: string | null
-          created_at?: string | null
-          id?: string
-          notes?: string | null
-          photo_urls?: string[] | null
-          quality_score?: number | null
-          scheduled_date: string
-          scheduled_time: string
-          status?: string
-          trainset_id: string
-          updated_at?: string | null
-        }
-        Update: {
-          assigned_crew?: string[] | null
-          bay_number?: string | null
-          checklist?: Json | null
           cleaning_type?: string
-          completion_time?: string | null
-          created_at?: string | null
+          created_at?: string
+          hours_required?: number | null
           id?: string
-          notes?: string | null
-          photo_urls?: string[] | null
-          quality_score?: number | null
-          scheduled_date?: string
-          scheduled_time?: string
-          status?: string
-          trainset_id?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      daily_induction_plans: {
-        Row: {
-          approved: boolean | null
-          approved_at: string | null
-          approved_by: string | null
-          created_at: string | null
-          demand_forecast: Json | null
-          generated_at: string | null
-          id: string
-          optimization_summary: Json | null
-          plan_date: string
-          trainsets_for_service: string[]
-          trainsets_in_maintenance: string[]
-          trainsets_on_standby: string[]
-          weather_context: Json | null
-        }
-        Insert: {
-          approved?: boolean | null
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string | null
-          demand_forecast?: Json | null
-          generated_at?: string | null
-          id?: string
-          optimization_summary?: Json | null
-          plan_date: string
-          trainsets_for_service: string[]
-          trainsets_in_maintenance: string[]
-          trainsets_on_standby: string[]
-          weather_context?: Json | null
+          scheduled_date?: string | null
+          status?: string | null
+          trainset_id?: string | null
         }
         Update: {
-          approved?: boolean | null
-          approved_at?: string | null
-          approved_by?: string | null
-          created_at?: string | null
-          demand_forecast?: Json | null
-          generated_at?: string | null
+          cleaning_type?: string
+          created_at?: string
+          hours_required?: number | null
           id?: string
-          optimization_summary?: Json | null
-          plan_date?: string
-          trainsets_for_service?: string[]
-          trainsets_in_maintenance?: string[]
-          trainsets_on_standby?: string[]
-          weather_context?: Json | null
+          scheduled_date?: string | null
+          status?: string | null
+          trainset_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cleaning_schedules_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       decision_conflicts: {
         Row: {
-          affected_resources: Json
           conflict_type: string
           created_at: string
           description: string | null
           id: string
-          optimization_id: string | null
           resolution_strategy: string | null
           resolved: boolean | null
           resolved_at: string | null
-          severity: string
+          severity: string | null
+          trainset_ids: string[] | null
         }
         Insert: {
-          affected_resources: Json
           conflict_type: string
           created_at?: string
           description?: string | null
           id?: string
-          optimization_id?: string | null
           resolution_strategy?: string | null
           resolved?: boolean | null
           resolved_at?: string | null
-          severity: string
+          severity?: string | null
+          trainset_ids?: string[] | null
         }
         Update: {
-          affected_resources?: Json
           conflict_type?: string
           created_at?: string
           description?: string | null
           id?: string
-          optimization_id?: string | null
           resolution_strategy?: string | null
           resolved?: boolean | null
           resolved_at?: string | null
-          severity?: string
+          severity?: string | null
+          trainset_ids?: string[] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "decision_conflicts_optimization_id_fkey"
-            columns: ["optimization_id"]
-            isOneToOne: false
-            referencedRelation: "optimization_history"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       depot_congestion: {
         Row: {
           active_shunting_moves: number | null
           available_tracks: number | null
           congestion_score: number | null
-          created_at: string | null
+          created_at: string
           depot_section: string
           estimated_delay_minutes: number | null
           id: string
           sensor_data: Json | null
-          timestamp: string
+          timestamp: string | null
           traffic_flow: string | null
         }
         Insert: {
           active_shunting_moves?: number | null
           available_tracks?: number | null
           congestion_score?: number | null
-          created_at?: string | null
+          created_at?: string
           depot_section: string
           estimated_delay_minutes?: number | null
           id?: string
           sensor_data?: Json | null
-          timestamp?: string
+          timestamp?: string | null
           traffic_flow?: string | null
         }
         Update: {
           active_shunting_moves?: number | null
           available_tracks?: number | null
           congestion_score?: number | null
-          created_at?: string | null
+          created_at?: string
           depot_section?: string
           estimated_delay_minutes?: number | null
           id?: string
           sensor_data?: Json | null
-          timestamp?: string
+          timestamp?: string | null
           traffic_flow?: string | null
         }
         Relationships: []
       }
       fitness_certificates: {
         Row: {
-          certificate_number: string | null
           certificate_type: string
           created_at: string
-          expiry_date: string
+          expiry_date: string | null
           id: string
-          inspection_details: Json | null
-          issue_date: string
-          issuing_authority: string | null
-          renewal_reminder_sent: boolean | null
-          status: Database["public"]["Enums"]["certificate_status"]
-          trainset_id: string
-          updated_at: string
+          is_valid: boolean | null
+          issued_date: string | null
+          trainset_id: string | null
         }
         Insert: {
-          certificate_number?: string | null
           certificate_type: string
           created_at?: string
-          expiry_date: string
-          id: string
-          inspection_details?: Json | null
-          issue_date: string
-          issuing_authority?: string | null
-          renewal_reminder_sent?: boolean | null
-          status?: Database["public"]["Enums"]["certificate_status"]
-          trainset_id: string
-          updated_at?: string
+          expiry_date?: string | null
+          id?: string
+          is_valid?: boolean | null
+          issued_date?: string | null
+          trainset_id?: string | null
         }
         Update: {
-          certificate_number?: string | null
           certificate_type?: string
           created_at?: string
-          expiry_date?: string
+          expiry_date?: string | null
           id?: string
-          inspection_details?: Json | null
-          issue_date?: string
-          issuing_authority?: string | null
-          renewal_reminder_sent?: boolean | null
-          status?: Database["public"]["Enums"]["certificate_status"]
-          trainset_id?: string
-          updated_at?: string
+          is_valid?: boolean | null
+          issued_date?: string | null
+          trainset_id?: string | null
         }
         Relationships: [
           {
@@ -458,132 +298,89 @@ export type Database = {
       }
       incidents: {
         Row: {
-          assigned_to: string | null
-          created_at: string | null
+          created_at: string
           description: string | null
           id: string
-          impact_analysis: Json | null
-          incident_number: string
-          reported_at: string | null
-          reported_by: string | null
-          resolution_notes: string | null
+          incident_type: string
+          occurred_at: string | null
           resolved_at: string | null
-          severity: string
-          status: string
-          title: string
+          severity: string | null
+          status: string | null
           trainset_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          assigned_to?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          impact_analysis?: Json | null
-          incident_number: string
-          reported_at?: string | null
-          reported_by?: string | null
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          severity: string
-          status?: string
-          title: string
-          trainset_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          assigned_to?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          impact_analysis?: Json | null
-          incident_number?: string
-          reported_at?: string | null
-          reported_by?: string | null
-          resolution_notes?: string | null
-          resolved_at?: string | null
-          severity?: string
-          status?: string
-          title?: string
-          trainset_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      jobs: {
-        Row: {
-          created_at: string
-          id: number
         }
         Insert: {
           created_at?: string
-          id?: number
+          description?: string | null
+          id?: string
+          incident_type: string
+          occurred_at?: string | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          trainset_id?: string | null
         }
         Update: {
           created_at?: string
-          id?: number
+          description?: string | null
+          id?: string
+          incident_type?: string
+          occurred_at?: string | null
+          resolved_at?: string | null
+          severity?: string | null
+          status?: string | null
+          trainset_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "incidents_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       maintenance_jobs: {
         Row: {
-          actual_end: string | null
-          actual_start: string | null
-          assigned_staff: string[] | null
-          completion_notes: string | null
+          completed_date: string | null
           created_at: string
-          created_by: string | null
           description: string | null
-          estimated_duration: number | null
           id: string
           job_type: string
           maximo_job_id: string | null
-          priority: Database["public"]["Enums"]["job_priority"]
-          requirements: Json | null
-          scheduled_end: string | null
+          priority: string | null
+          scheduled_date: string | null
           scheduled_start: string | null
-          status: Database["public"]["Enums"]["job_status"]
-          trainset_id: string
+          status: string
+          trainset_id: string | null
           updated_at: string
         }
         Insert: {
-          actual_end?: string | null
-          actual_start?: string | null
-          assigned_staff?: string[] | null
-          completion_notes?: string | null
+          completed_date?: string | null
           created_at?: string
-          created_by?: string | null
           description?: string | null
-          estimated_duration?: number | null
-          id: string
+          id?: string
           job_type: string
           maximo_job_id?: string | null
-          priority?: Database["public"]["Enums"]["job_priority"]
-          requirements?: Json | null
-          scheduled_end?: string | null
+          priority?: string | null
+          scheduled_date?: string | null
           scheduled_start?: string | null
-          status?: Database["public"]["Enums"]["job_status"]
-          trainset_id: string
+          status?: string
+          trainset_id?: string | null
           updated_at?: string
         }
         Update: {
-          actual_end?: string | null
-          actual_start?: string | null
-          assigned_staff?: string[] | null
-          completion_notes?: string | null
+          completed_date?: string | null
           created_at?: string
-          created_by?: string | null
           description?: string | null
-          estimated_duration?: number | null
           id?: string
           job_type?: string
           maximo_job_id?: string | null
-          priority?: Database["public"]["Enums"]["job_priority"]
-          requirements?: Json | null
-          scheduled_end?: string | null
+          priority?: string | null
+          scheduled_date?: string | null
           scheduled_start?: string | null
-          status?: Database["public"]["Enums"]["job_status"]
-          trainset_id?: string
+          status?: string
+          trainset_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -599,27 +396,30 @@ export type Database = {
       mileage_records: {
         Row: {
           created_at: string
-          daily_mileage: number
-          date: string
+          daily_mileage: number | null
+          date: string | null
           id: string
-          route_details: Json | null
-          trainset_id: string
+          mileage: number
+          recorded_at: string
+          trainset_id: string | null
         }
         Insert: {
           created_at?: string
-          daily_mileage: number
-          date: string
+          daily_mileage?: number | null
+          date?: string | null
           id?: string
-          route_details?: Json | null
-          trainset_id: string
+          mileage: number
+          recorded_at?: string
+          trainset_id?: string | null
         }
         Update: {
           created_at?: string
-          daily_mileage?: number
-          date?: string
+          daily_mileage?: number | null
+          date?: string | null
           id?: string
-          route_details?: Json | null
-          trainset_id?: string
+          mileage?: number
+          recorded_at?: string
+          trainset_id?: string | null
         }
         Relationships: [
           {
@@ -637,194 +437,122 @@ export type Database = {
           actual_duration_minutes: number | null
           actual_induction_time: string | null
           congestion_impact_actual: number | null
-          congestion_impact_predicted: number | null
-          created_at: string | null
+          created_at: string
           deviation_minutes: number | null
           id: string
           learning_data: Json | null
-          optimization_id: string | null
-          planned_induction_time: string | null
-          predicted_conflicts: number | null
-          predicted_duration_minutes: number | null
           punctuality_achieved: boolean | null
           success_score: number | null
-          trainset_id: string
+          trainset_id: string | null
           weather_impact_actual: number | null
-          weather_impact_predicted: number | null
         }
         Insert: {
           actual_conflicts?: number | null
           actual_duration_minutes?: number | null
           actual_induction_time?: string | null
           congestion_impact_actual?: number | null
-          congestion_impact_predicted?: number | null
-          created_at?: string | null
+          created_at?: string
           deviation_minutes?: number | null
           id?: string
           learning_data?: Json | null
-          optimization_id?: string | null
-          planned_induction_time?: string | null
-          predicted_conflicts?: number | null
-          predicted_duration_minutes?: number | null
           punctuality_achieved?: boolean | null
           success_score?: number | null
-          trainset_id: string
+          trainset_id?: string | null
           weather_impact_actual?: number | null
-          weather_impact_predicted?: number | null
         }
         Update: {
           actual_conflicts?: number | null
           actual_duration_minutes?: number | null
           actual_induction_time?: string | null
           congestion_impact_actual?: number | null
-          congestion_impact_predicted?: number | null
-          created_at?: string | null
+          created_at?: string
           deviation_minutes?: number | null
           id?: string
           learning_data?: Json | null
-          optimization_id?: string | null
-          planned_induction_time?: string | null
-          predicted_conflicts?: number | null
-          predicted_duration_minutes?: number | null
           punctuality_achieved?: boolean | null
           success_score?: number | null
-          trainset_id?: string
+          trainset_id?: string | null
           weather_impact_actual?: number | null
-          weather_impact_predicted?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "operation_outcomes_optimization_id_fkey"
-            columns: ["optimization_id"]
+            foreignKeyName: "operation_outcomes_trainset_id_fkey"
+            columns: ["trainset_id"]
             isOneToOne: false
-            referencedRelation: "optimization_history"
+            referencedRelation: "trainsets"
             referencedColumns: ["id"]
           },
         ]
       }
       optimization_history: {
         Row: {
-          algorithm_version: string
           applied: boolean | null
-          confidence_score: number | null
           created_at: string
-          created_by: string | null
           execution_time_ms: number | null
-          execution_timestamp: string
+          execution_timestamp: string | null
           feedback_score: number | null
           id: string
-          input_parameters: Json
-          recommendations: Json
+          optimization_type: string
+          parameters: Json | null
+          results: Json | null
+          status: string | null
         }
         Insert: {
-          algorithm_version: string
           applied?: boolean | null
-          confidence_score?: number | null
           created_at?: string
-          created_by?: string | null
           execution_time_ms?: number | null
-          execution_timestamp?: string
+          execution_timestamp?: string | null
           feedback_score?: number | null
           id?: string
-          input_parameters: Json
-          recommendations: Json
+          optimization_type: string
+          parameters?: Json | null
+          results?: Json | null
+          status?: string | null
         }
         Update: {
-          algorithm_version?: string
           applied?: boolean | null
-          confidence_score?: number | null
           created_at?: string
-          created_by?: string | null
           execution_time_ms?: number | null
-          execution_timestamp?: string
+          execution_timestamp?: string | null
           feedback_score?: number | null
           id?: string
-          input_parameters?: Json
-          recommendations?: Json
-        }
-        Relationships: []
-      }
-      performance_metrics: {
-        Row: {
-          accuracy_percentage: number | null
-          accurate_predictions: number | null
-          average_deviation_minutes: number | null
-          created_at: string | null
-          demand_prediction_accuracy: number | null
-          detailed_metrics: Json | null
-          id: string
-          maintenance_reduction_rate: number | null
-          metric_date: string
-          metric_type: string | null
-          ml_model_version: string | null
-          punctuality_rate: number | null
-          total_conflicts_actual: number | null
-          total_conflicts_predicted: number | null
-          total_predictions: number | null
-          weather_prediction_accuracy: number | null
-        }
-        Insert: {
-          accuracy_percentage?: number | null
-          accurate_predictions?: number | null
-          average_deviation_minutes?: number | null
-          created_at?: string | null
-          demand_prediction_accuracy?: number | null
-          detailed_metrics?: Json | null
-          id?: string
-          maintenance_reduction_rate?: number | null
-          metric_date: string
-          metric_type?: string | null
-          ml_model_version?: string | null
-          punctuality_rate?: number | null
-          total_conflicts_actual?: number | null
-          total_conflicts_predicted?: number | null
-          total_predictions?: number | null
-          weather_prediction_accuracy?: number | null
-        }
-        Update: {
-          accuracy_percentage?: number | null
-          accurate_predictions?: number | null
-          average_deviation_minutes?: number | null
-          created_at?: string | null
-          demand_prediction_accuracy?: number | null
-          detailed_metrics?: Json | null
-          id?: string
-          maintenance_reduction_rate?: number | null
-          metric_date?: string
-          metric_type?: string | null
-          ml_model_version?: string | null
-          punctuality_rate?: number | null
-          total_conflicts_actual?: number | null
-          total_conflicts_predicted?: number | null
-          total_predictions?: number | null
-          weather_prediction_accuracy?: number | null
+          optimization_type?: string
+          parameters?: Json | null
+          results?: Json | null
+          status?: string | null
         }
         Relationships: []
       }
       profiles: {
         Row: {
           created_at: string
-          department: string
-          employee_id: string
-          full_name: string
+          department: string | null
+          display_name: string | null
+          email: string | null
+          employee_id: string | null
+          full_name: string | null
           id: string
           updated_at: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          department: string
-          employee_id: string
-          full_name: string
+          department?: string | null
+          display_name?: string | null
+          email?: string | null
+          employee_id?: string | null
+          full_name?: string | null
           id?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           created_at?: string
-          department?: string
-          employee_id?: string
-          full_name?: string
+          department?: string | null
+          display_name?: string | null
+          email?: string | null
+          employee_id?: string | null
+          full_name?: string | null
           id?: string
           updated_at?: string
           user_id?: string
@@ -833,54 +561,39 @@ export type Database = {
       }
       stabling_positions: {
         Row: {
-          adjacent_positions: string[] | null
-          capacity: number | null
+          bay_name: string
           created_at: string
-          current_occupant: string | null
-          depot_section: string
-          facilities: string[] | null
-          geometry: Json | null
           id: string
-          position_name: string
-          position_type: string
-          status: Database["public"]["Enums"]["position_status"]
-          track_number: number | null
-          updated_at: string
+          is_occupied: boolean | null
+          position_name: string | null
+          position_type: string | null
+          status: string | null
+          trainset_id: string | null
         }
         Insert: {
-          adjacent_positions?: string[] | null
-          capacity?: number | null
+          bay_name: string
           created_at?: string
-          current_occupant?: string | null
-          depot_section: string
-          facilities?: string[] | null
-          geometry?: Json | null
-          id: string
-          position_name: string
-          position_type: string
-          status?: Database["public"]["Enums"]["position_status"]
-          track_number?: number | null
-          updated_at?: string
+          id?: string
+          is_occupied?: boolean | null
+          position_name?: string | null
+          position_type?: string | null
+          status?: string | null
+          trainset_id?: string | null
         }
         Update: {
-          adjacent_positions?: string[] | null
-          capacity?: number | null
+          bay_name?: string
           created_at?: string
-          current_occupant?: string | null
-          depot_section?: string
-          facilities?: string[] | null
-          geometry?: Json | null
           id?: string
-          position_name?: string
-          position_type?: string
-          status?: Database["public"]["Enums"]["position_status"]
-          track_number?: number | null
-          updated_at?: string
+          is_occupied?: boolean | null
+          position_name?: string | null
+          position_type?: string | null
+          status?: string | null
+          trainset_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "stabling_positions_current_occupant_fkey"
-            columns: ["current_occupant"]
+            foreignKeyName: "stabling_positions_trainset_id_fkey"
+            columns: ["trainset_id"]
             isOneToOne: false
             referencedRelation: "trainsets"
             referencedColumns: ["id"]
@@ -889,132 +602,81 @@ export type Database = {
       }
       staff_schedules: {
         Row: {
-          assigned_job_id: string | null
-          assigned_trainset_id: string | null
           created_at: string
           date: string
-          end_time: string
+          end_time: string | null
           id: string
-          role: Database["public"]["Enums"]["staff_role"]
-          shift: Database["public"]["Enums"]["shift_type"]
-          staff_id: string
-          staff_name: string
-          start_time: string
-          status: string
-          updated_at: string
+          role: string | null
+          shift_type: string | null
+          staff_id: string | null
+          staff_name: string | null
+          start_time: string | null
+          status: string | null
         }
         Insert: {
-          assigned_job_id?: string | null
-          assigned_trainset_id?: string | null
           created_at?: string
           date: string
-          end_time: string
-          id: string
-          role: Database["public"]["Enums"]["staff_role"]
-          shift: Database["public"]["Enums"]["shift_type"]
-          staff_id: string
-          staff_name: string
-          start_time: string
-          status?: string
-          updated_at?: string
+          end_time?: string | null
+          id?: string
+          role?: string | null
+          shift_type?: string | null
+          staff_id?: string | null
+          staff_name?: string | null
+          start_time?: string | null
+          status?: string | null
         }
         Update: {
-          assigned_job_id?: string | null
-          assigned_trainset_id?: string | null
           created_at?: string
           date?: string
-          end_time?: string
+          end_time?: string | null
           id?: string
-          role?: Database["public"]["Enums"]["staff_role"]
-          shift?: Database["public"]["Enums"]["shift_type"]
-          staff_id?: string
-          staff_name?: string
-          start_time?: string
-          status?: string
-          updated_at?: string
+          role?: string | null
+          shift_type?: string | null
+          staff_id?: string | null
+          staff_name?: string | null
+          start_time?: string | null
+          status?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "staff_schedules_assigned_job_id_fkey"
-            columns: ["assigned_job_id"]
-            isOneToOne: false
-            referencedRelation: "maintenance_jobs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "staff_schedules_assigned_trainset_id_fkey"
-            columns: ["assigned_trainset_id"]
-            isOneToOne: false
-            referencedRelation: "trainsets"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       trainsets: {
         Row: {
           battery_level: number | null
-          branding_contract_id: string | null
-          component_health_score: number | null
           created_at: string
-          current_location: string | null
-          current_stabling_position: string | null
-          fitness_certificate_expiry: string | null
-          historical_performance: Json | null
+          home_bay: string | null
           id: string
-          iot_sensor_alerts: Json | null
-          last_cleaning_date: string | null
-          last_maintenance_date: string | null
-          last_service_date: string | null
           metadata: Json | null
-          name: string
-          next_maintenance_date: string | null
+          name: string | null
           operational_hours: number | null
-          status: Database["public"]["Enums"]["train_status"]
+          status: string
           total_mileage: number | null
+          train_id: string
           updated_at: string
         }
         Insert: {
           battery_level?: number | null
-          branding_contract_id?: string | null
-          component_health_score?: number | null
           created_at?: string
-          current_location?: string | null
-          current_stabling_position?: string | null
-          fitness_certificate_expiry?: string | null
-          historical_performance?: Json | null
-          id: string
-          iot_sensor_alerts?: Json | null
-          last_cleaning_date?: string | null
-          last_maintenance_date?: string | null
-          last_service_date?: string | null
+          home_bay?: string | null
+          id?: string
           metadata?: Json | null
-          name: string
-          next_maintenance_date?: string | null
+          name?: string | null
           operational_hours?: number | null
-          status?: Database["public"]["Enums"]["train_status"]
+          status?: string
           total_mileage?: number | null
+          train_id: string
           updated_at?: string
         }
         Update: {
           battery_level?: number | null
-          branding_contract_id?: string | null
-          component_health_score?: number | null
           created_at?: string
-          current_location?: string | null
-          current_stabling_position?: string | null
-          fitness_certificate_expiry?: string | null
-          historical_performance?: Json | null
+          home_bay?: string | null
           id?: string
-          iot_sensor_alerts?: Json | null
-          last_cleaning_date?: string | null
-          last_maintenance_date?: string | null
-          last_service_date?: string | null
           metadata?: Json | null
-          name?: string
-          next_maintenance_date?: string | null
+          name?: string | null
           operational_hours?: number | null
-          status?: Database["public"]["Enums"]["train_status"]
+          status?: string
           total_mileage?: number | null
+          train_id?: string
           updated_at?: string
         }
         Relationships: []
@@ -1023,19 +685,19 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          role: Database["public"]["Enums"]["app_role"]
+          role: string
           user_id: string
         }
         Insert: {
           created_at?: string
           id?: string
-          role: Database["public"]["Enums"]["app_role"]
+          role?: string
           user_id: string
         }
         Update: {
           created_at?: string
           id?: string
-          role?: Database["public"]["Enums"]["app_role"]
+          role?: string
           user_id?: string
         }
         Relationships: []
@@ -1043,44 +705,29 @@ export type Database = {
       weather_data: {
         Row: {
           conditions: string | null
-          created_at: string | null
-          flooding_risk_score: number | null
-          forecast_data: Json | null
-          humidity: number | null
+          created_at: string
+          date: string
           id: string
-          rainfall: number | null
+          precipitation: number | null
           temperature: number | null
-          timestamp: string
-          visibility: number | null
-          weather_severity_score: number | null
           wind_speed: number | null
         }
         Insert: {
           conditions?: string | null
-          created_at?: string | null
-          flooding_risk_score?: number | null
-          forecast_data?: Json | null
-          humidity?: number | null
+          created_at?: string
+          date: string
           id?: string
-          rainfall?: number | null
+          precipitation?: number | null
           temperature?: number | null
-          timestamp?: string
-          visibility?: number | null
-          weather_severity_score?: number | null
           wind_speed?: number | null
         }
         Update: {
           conditions?: string | null
-          created_at?: string | null
-          flooding_risk_score?: number | null
-          forecast_data?: Json | null
-          humidity?: number | null
+          created_at?: string
+          date?: string
           id?: string
-          rainfall?: number | null
+          precipitation?: number | null
           temperature?: number | null
-          timestamp?: string
-          visibility?: number | null
-          weather_severity_score?: number | null
           wind_speed?: number | null
         }
         Relationships: []
@@ -1090,62 +737,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_user_profile: {
-        Args: { _user_id: string }
-        Returns: {
-          department: string
-          employee_id: string
-          full_name: string
-          roles: Database["public"]["Enums"]["app_role"][]
-        }[]
-      }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
-      app_role:
-        | "admin"
-        | "supervisor"
-        | "maintenance_planner"
-        | "branding_manager"
-        | "telecom_admin"
-        | "rolling_stock_admin"
-        | "auditor"
-      certificate_status:
-        | "valid"
-        | "expiring_soon"
-        | "expired"
-        | "pending_renewal"
-      job_priority: "critical" | "high" | "medium" | "low"
-      job_status:
-        | "pending"
-        | "scheduled"
-        | "in_progress"
-        | "completed"
-        | "delayed"
-        | "cancelled"
-      position_status: "available" | "occupied" | "maintenance" | "reserved"
-      shift_type: "morning" | "afternoon" | "night"
-      staff_role:
-        | "driver"
-        | "conductor"
-        | "maintenance"
-        | "supervisor"
-        | "security"
-        | "cleaner"
-      train_status:
-        | "operational"
-        | "maintenance"
-        | "cleaning"
-        | "branding"
-        | "awaiting_fitness"
-        | "out_of_service"
-        | "standby"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1272,50 +867,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      app_role: [
-        "admin",
-        "supervisor",
-        "maintenance_planner",
-        "branding_manager",
-        "telecom_admin",
-        "rolling_stock_admin",
-        "auditor",
-      ],
-      certificate_status: [
-        "valid",
-        "expiring_soon",
-        "expired",
-        "pending_renewal",
-      ],
-      job_priority: ["critical", "high", "medium", "low"],
-      job_status: [
-        "pending",
-        "scheduled",
-        "in_progress",
-        "completed",
-        "delayed",
-        "cancelled",
-      ],
-      position_status: ["available", "occupied", "maintenance", "reserved"],
-      shift_type: ["morning", "afternoon", "night"],
-      staff_role: [
-        "driver",
-        "conductor",
-        "maintenance",
-        "supervisor",
-        "security",
-        "cleaner",
-      ],
-      train_status: [
-        "operational",
-        "maintenance",
-        "cleaning",
-        "branding",
-        "awaiting_fitness",
-        "out_of_service",
-        "standby",
-      ],
-    },
+    Enums: {},
   },
 } as const

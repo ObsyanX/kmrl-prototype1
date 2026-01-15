@@ -19,11 +19,11 @@ const AuditTrail: React.FC = () => {
   const fetchAuditLogs = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('audit_log')
+      const { data, error } = await (supabase
+        .from('audit_log' as any)
         .select('*')
         .order('created_at', { ascending: false })
-        .limit(100);
+        .limit(100) as any);
 
       if (error) throw error;
       setAuditLogs(data || []);

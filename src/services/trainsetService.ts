@@ -5,13 +5,13 @@ export const trainsetService = {
    * Fetch all trainsets with optional filters
    */
   async getTrainsets(status?: string) {
-    let query = supabase.from('trainsets').select('*');
+    let query = supabase.from('trainsets' as any).select('*');
     
     if (status) {
-      query = query.eq('status', status as any);
+      query = query.eq('status', status);
     }
 
-    const { data, error } = await query.order('name');
+    const { data, error } = await (query.order('name') as any);
     if (error) throw error;
     return data;
   },
@@ -26,10 +26,10 @@ export const trainsetService = {
       { data: certificates, error: certsError },
       { data: mileageRecords, error: mileageError }
     ] = await Promise.all([
-      supabase.from('trainsets').select('*').eq('id', id).single(),
-      supabase.from('maintenance_jobs').select('*').eq('trainset_id', id),
-      supabase.from('fitness_certificates').select('*').eq('trainset_id', id),
-      supabase.from('mileage_records').select('*').eq('trainset_id', id).limit(30)
+      supabase.from('trainsets' as any).select('*').eq('id', id).single() as any,
+      supabase.from('maintenance_jobs' as any).select('*').eq('trainset_id', id) as any,
+      supabase.from('fitness_certificates' as any).select('*').eq('trainset_id', id) as any,
+      supabase.from('mileage_records' as any).select('*').eq('trainset_id', id).limit(30) as any
     ]);
 
     if (trainsetError) throw trainsetError;
@@ -46,12 +46,12 @@ export const trainsetService = {
    * Update trainset
    */
   async updateTrainset(id: string, updates: any) {
-    const { data, error } = await supabase
-      .from('trainsets')
+    const { data, error } = await (supabase
+      .from('trainsets' as any)
       .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .single() as any);
 
     if (error) throw error;
     return data;
@@ -61,17 +61,17 @@ export const trainsetService = {
    * Get maintenance jobs for trainset
    */
   async getMaintenanceJobs(trainsetId?: string, status?: string) {
-    let query = supabase.from('maintenance_jobs').select('*');
+    let query = supabase.from('maintenance_jobs' as any).select('*');
     
     if (trainsetId) {
       query = query.eq('trainset_id', trainsetId);
     }
 
     if (status) {
-      query = query.eq('status', status as any);
+      query = query.eq('status', status);
     }
 
-    const { data, error } = await query.order('scheduled_start', { ascending: true });
+    const { data, error } = await (query.order('scheduled_start', { ascending: true }) as any);
     if (error) throw error;
     return data;
   },
@@ -80,11 +80,11 @@ export const trainsetService = {
    * Create maintenance job
    */
   async createMaintenanceJob(job: any) {
-    const { data, error } = await supabase
-      .from('maintenance_jobs')
+    const { data, error } = await (supabase
+      .from('maintenance_jobs' as any)
       .insert(job)
       .select()
-      .single();
+      .single() as any);
 
     if (error) throw error;
     return data;
@@ -94,12 +94,12 @@ export const trainsetService = {
    * Update maintenance job status
    */
   async updateMaintenanceJob(id: string, updates: any) {
-    const { data, error } = await supabase
-      .from('maintenance_jobs')
+    const { data, error } = await (supabase
+      .from('maintenance_jobs' as any)
       .update(updates)
       .eq('id', id)
       .select()
-      .single();
+      .single() as any);
 
     if (error) throw error;
     return data;
@@ -109,13 +109,13 @@ export const trainsetService = {
    * Get fitness certificates
    */
   async getCertificates(trainsetId?: string) {
-    let query = supabase.from('fitness_certificates').select('*');
+    let query = supabase.from('fitness_certificates' as any).select('*');
     
     if (trainsetId) {
       query = query.eq('trainset_id', trainsetId);
     }
 
-    const { data, error } = await query.order('expiry_date', { ascending: true });
+    const { data, error } = await (query.order('expiry_date', { ascending: true }) as any);
     if (error) throw error;
     return data;
   },
@@ -124,10 +124,10 @@ export const trainsetService = {
    * Get stabling positions
    */
   async getStablingPositions(status?: string) {
-    let query = supabase.from('stabling_positions').select('*');
+    let query = supabase.from('stabling_positions' as any).select('*');
     
     if (status) {
-      query = query.eq('status', status as any);
+      query = query.eq('status', status);
     }
 
     const { data, error } = await query.order('position_name');
@@ -139,7 +139,7 @@ export const trainsetService = {
    * Get staff schedules
    */
   async getStaffSchedules(date?: string) {
-    let query = supabase.from('staff_schedules').select('*');
+    let query = supabase.from('staff_schedules' as any).select('*');
     
     if (date) {
       query = query.eq('date', date);
@@ -158,7 +158,7 @@ export const trainsetService = {
    */
   async getBrandingContracts(status = 'active') {
     const { data, error } = await supabase
-      .from('branding_contracts')
+      .from('branding_contracts' as any)
       .select('*')
       .eq('status', status)
       .order('priority_level', { ascending: false });
@@ -175,7 +175,7 @@ export const trainsetService = {
     startDate.setDate(startDate.getDate() - days);
 
     const { data, error } = await supabase
-      .from('mileage_records')
+      .from('mileage_records' as any)
       .select('*')
       .gte('date', startDate.toISOString().split('T')[0]);
 
@@ -185,7 +185,7 @@ export const trainsetService = {
     const byTrainset: Record<string, any> = {};
     let totalMileage = 0;
 
-    for (const record of data || []) {
+    for (const record of (data || []) as any[]) {
       const trainsetId = record.trainset_id;
       if (!byTrainset[trainsetId]) {
         byTrainset[trainsetId] = {
@@ -196,10 +196,10 @@ export const trainsetService = {
         };
       }
 
-      byTrainset[trainsetId].total_mileage += Number(record.daily_mileage);
+      byTrainset[trainsetId].total_mileage += Number(record.daily_mileage || record.mileage || 0);
       byTrainset[trainsetId].days_tracked++;
       byTrainset[trainsetId].records.push(record);
-      totalMileage += Number(record.daily_mileage);
+      totalMileage += Number(record.daily_mileage || record.mileage || 0);
     }
 
     const trainsetArray = Object.values(byTrainset);

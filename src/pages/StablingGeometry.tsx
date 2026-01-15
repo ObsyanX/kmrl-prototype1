@@ -17,11 +17,11 @@ const StablingGeometry: React.FC = () => {
   const fetchStablingPositions = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('stabling_positions')
+      const { data, error } = await (supabase
+        .from('stabling_positions' as any)
         .select('*')
         .order('depot_section', { ascending: true })
-        .order('track_number', { ascending: true });
+        .order('track_number', { ascending: true }) as any);
 
       if (error) throw error;
       setPositions(data || []);

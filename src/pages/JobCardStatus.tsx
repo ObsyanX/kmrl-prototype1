@@ -41,17 +41,17 @@ const JobCardStatus: React.FC = () => {
       setLoading(true);
       
       // Fetch trainsets with maintenance jobs
-      const { data: trainsets, error: trainsetsError } = await supabase
-        .from('trainsets')
-        .select('*');
+      const { data: trainsets, error: trainsetsError } = await (supabase
+        .from('trainsets' as any)
+        .select('*') as any);
 
       if (trainsetsError) throw trainsetsError;
 
       // Fetch maintenance jobs
-      const { data: jobs, error: jobsError } = await supabase
-        .from('maintenance_jobs')
+      const { data: jobs, error: jobsError } = await (supabase
+        .from('maintenance_jobs' as any)
         .select('*')
-        .in('status', ['pending', 'in_progress', 'scheduled']);
+        .in('status', ['pending', 'in_progress', 'scheduled']) as any);
 
       if (jobsError) throw jobsError;
 
@@ -147,8 +147,8 @@ const JobCardStatus: React.FC = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('trainsets')
+      const { error } = await (supabase
+        .from('trainsets' as any)
         .update({
           metadata: {
             manual_hold: true,
@@ -156,7 +156,7 @@ const JobCardStatus: React.FC = () => {
             hold_timestamp: new Date().toISOString()
           }
         })
-        .eq('id', selectedTrain);
+        .eq('id', selectedTrain) as any);
 
       if (error) throw error;
 

@@ -58,10 +58,10 @@ const DataEntry: React.FC = () => {
   const handleAddCalendarEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { error } = await supabase.from('calendar_events').insert([{
+      const { error } = await (supabase.from('calendar_events' as any).insert([{
         ...eventForm,
         fleet_adjustment_required: eventForm.ridership_multiplier > 1.2,
-      }]);
+      }]) as any);
 
       if (error) throw error;
 
@@ -83,7 +83,7 @@ const DataEntry: React.FC = () => {
   const handleAddCongestionData = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const { error } = await supabase.from('depot_congestion').insert([{
+      const { error } = await (supabase.from('depot_congestion' as any).insert([{
         ...congestionForm,
         timestamp: new Date().toISOString(),
         estimated_delay_minutes: congestionForm.congestion_score * 2,
@@ -91,7 +91,7 @@ const DataEntry: React.FC = () => {
           track_occupancy: congestionForm.congestion_score / 10,
           manual_entry: true,
         },
-      }]);
+      }]) as any);
 
       if (error) throw error;
 
