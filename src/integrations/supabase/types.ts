@@ -38,6 +38,101 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_explanations: {
+        Row: {
+          active_constraints: Json | null
+          binding_bottleneck: string | null
+          confidence_breakdown: Json | null
+          created_at: string
+          explanation_type: string
+          id: string
+          induction_plan_id: string | null
+          natural_language_explanation: string | null
+          override_consequences: Json | null
+          risk_factors: Json | null
+          what_if_impact: Json | null
+        }
+        Insert: {
+          active_constraints?: Json | null
+          binding_bottleneck?: string | null
+          confidence_breakdown?: Json | null
+          created_at?: string
+          explanation_type: string
+          id?: string
+          induction_plan_id?: string | null
+          natural_language_explanation?: string | null
+          override_consequences?: Json | null
+          risk_factors?: Json | null
+          what_if_impact?: Json | null
+        }
+        Update: {
+          active_constraints?: Json | null
+          binding_bottleneck?: string | null
+          confidence_breakdown?: Json | null
+          created_at?: string
+          explanation_type?: string
+          id?: string
+          induction_plan_id?: string | null
+          natural_language_explanation?: string | null
+          override_consequences?: Json | null
+          risk_factors?: Json | null
+          what_if_impact?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_explanations_induction_plan_id_fkey"
+            columns: ["induction_plan_id"]
+            isOneToOne: false
+            referencedRelation: "induction_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_actions: {
+        Row: {
+          action_details: Json
+          action_type: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          ip_address: string | null
+          new_state: Json | null
+          previous_state: Json | null
+          reason: string | null
+          user_id: string | null
+          user_role: string | null
+        }
+        Insert: {
+          action_details?: Json
+          action_type: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          new_state?: Json | null
+          previous_state?: Json | null
+          reason?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Update: {
+          action_details?: Json
+          action_type?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          new_state?: Json | null
+          previous_state?: Json | null
+          reason?: string | null
+          user_id?: string | null
+          user_role?: string | null
+        }
+        Relationships: []
+      }
       audit_log: {
         Row: {
           action: string
@@ -179,6 +274,104 @@ export type Database = {
             columns: ["trainset_id"]
             isOneToOne: false
             referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      constraint_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          parameters: Json
+          rule_category: string
+          rule_name: string
+          rule_type: string
+          updated_at: string
+          violation_penalty: number | null
+          weight: number | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parameters?: Json
+          rule_category: string
+          rule_name: string
+          rule_type?: string
+          updated_at?: string
+          violation_penalty?: number | null
+          weight?: number | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          parameters?: Json
+          rule_category?: string
+          rule_name?: string
+          rule_type?: string
+          updated_at?: string
+          violation_penalty?: number | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
+      crew_assignments: {
+        Row: {
+          certification_valid: boolean | null
+          created_at: string
+          duty_end_time: string
+          duty_start_time: string
+          id: string
+          induction_plan_id: string | null
+          notes: string | null
+          rest_hours_before_shift: number | null
+          role: string
+          staff_id: string | null
+          staff_name: string
+          status: string | null
+        }
+        Insert: {
+          certification_valid?: boolean | null
+          created_at?: string
+          duty_end_time: string
+          duty_start_time: string
+          id?: string
+          induction_plan_id?: string | null
+          notes?: string | null
+          rest_hours_before_shift?: number | null
+          role: string
+          staff_id?: string | null
+          staff_name: string
+          status?: string | null
+        }
+        Update: {
+          certification_valid?: boolean | null
+          created_at?: string
+          duty_end_time?: string
+          duty_start_time?: string
+          id?: string
+          induction_plan_id?: string | null
+          notes?: string | null
+          rest_hours_before_shift?: number | null
+          role?: string
+          staff_id?: string | null
+          staff_name?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_assignments_induction_plan_id_fkey"
+            columns: ["induction_plan_id"]
+            isOneToOne: false
+            referencedRelation: "induction_plans"
             referencedColumns: ["id"]
           },
         ]
@@ -333,6 +526,120 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "incidents_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      induction_plans: {
+        Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
+          ai_confidence: number | null
+          ai_reasoning: string | null
+          assigned_crew: Json | null
+          blocking_issues: Json | null
+          constraint_violations: Json | null
+          created_at: string
+          created_by: string | null
+          headway_buffer_minutes: number | null
+          id: string
+          locked: boolean | null
+          locked_at: string | null
+          locked_by: string | null
+          overridden_at: string | null
+          overridden_by: string | null
+          override_reason: string | null
+          plan_date: string
+          platform_id: string | null
+          power_block_required: boolean | null
+          priority: string
+          risk_score: number | null
+          safety_clearance_status: string | null
+          scheduled_end_time: string
+          scheduled_start_time: string
+          shift_type: string
+          status: string
+          trainset_id: string | null
+          turnaround_minutes: number | null
+          updated_at: string
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          assigned_crew?: Json | null
+          blocking_issues?: Json | null
+          constraint_violations?: Json | null
+          created_at?: string
+          created_by?: string | null
+          headway_buffer_minutes?: number | null
+          id?: string
+          locked?: boolean | null
+          locked_at?: string | null
+          locked_by?: string | null
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_reason?: string | null
+          plan_date: string
+          platform_id?: string | null
+          power_block_required?: boolean | null
+          priority?: string
+          risk_score?: number | null
+          safety_clearance_status?: string | null
+          scheduled_end_time: string
+          scheduled_start_time: string
+          shift_type?: string
+          status?: string
+          trainset_id?: string | null
+          turnaround_minutes?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          ai_confidence?: number | null
+          ai_reasoning?: string | null
+          assigned_crew?: Json | null
+          blocking_issues?: Json | null
+          constraint_violations?: Json | null
+          created_at?: string
+          created_by?: string | null
+          headway_buffer_minutes?: number | null
+          id?: string
+          locked?: boolean | null
+          locked_at?: string | null
+          locked_by?: string | null
+          overridden_at?: string | null
+          overridden_by?: string | null
+          override_reason?: string | null
+          plan_date?: string
+          platform_id?: string | null
+          power_block_required?: boolean | null
+          priority?: string
+          risk_score?: number | null
+          safety_clearance_status?: string | null
+          scheduled_end_time?: string
+          scheduled_start_time?: string
+          shift_type?: string
+          status?: string
+          trainset_id?: string | null
+          turnaround_minutes?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "induction_plans_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: false
+            referencedRelation: "stabling_positions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "induction_plans_trainset_id_fkey"
             columns: ["trainset_id"]
             isOneToOne: false
             referencedRelation: "trainsets"
@@ -558,6 +865,62 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      simulation_scenarios: {
+        Row: {
+          baseline_plan_id: string | null
+          comparison_metrics: Json | null
+          created_at: string
+          created_by: string | null
+          delay_propagation_minutes: number | null
+          feasibility_score: number | null
+          id: string
+          input_parameters: Json
+          risk_assessment: Json | null
+          scenario_name: string
+          scenario_type: string
+          simulation_results: Json | null
+          throughput_change_percent: number | null
+        }
+        Insert: {
+          baseline_plan_id?: string | null
+          comparison_metrics?: Json | null
+          created_at?: string
+          created_by?: string | null
+          delay_propagation_minutes?: number | null
+          feasibility_score?: number | null
+          id?: string
+          input_parameters?: Json
+          risk_assessment?: Json | null
+          scenario_name: string
+          scenario_type: string
+          simulation_results?: Json | null
+          throughput_change_percent?: number | null
+        }
+        Update: {
+          baseline_plan_id?: string | null
+          comparison_metrics?: Json | null
+          created_at?: string
+          created_by?: string | null
+          delay_propagation_minutes?: number | null
+          feasibility_score?: number | null
+          id?: string
+          input_parameters?: Json
+          risk_assessment?: Json | null
+          scenario_name?: string
+          scenario_type?: string
+          simulation_results?: Json | null
+          throughput_change_percent?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulation_scenarios_baseline_plan_id_fkey"
+            columns: ["baseline_plan_id"]
+            isOneToOne: false
+            referencedRelation: "induction_plans"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stabling_positions: {
         Row: {
