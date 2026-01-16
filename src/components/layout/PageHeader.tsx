@@ -1,11 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { LucideIcon } from 'lucide-react';
 
 interface PageHeaderProps {
   title: string;
+  subtitle?: string;
   description?: string;
-  icon?: LucideIcon;
+  icon?: React.ReactNode;
   actions?: React.ReactNode;
   className?: string;
   badge?: React.ReactNode;
@@ -13,12 +13,14 @@ interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
   title,
+  subtitle,
   description,
-  icon: Icon,
+  icon,
   actions,
   className,
   badge,
 }) => {
+  const desc = subtitle || description;
   return (
     <header
       className={cn(
@@ -28,9 +30,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       )}
     >
       <div className="flex items-start gap-3 min-w-0 flex-1">
-        {Icon && (
-          <div className="hidden sm:flex p-2 glass-card rounded-lg hologram-glow shrink-0">
-            <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+        {icon && (
+          <div className="hidden sm:flex p-2 glass-card rounded-lg hologram-glow shrink-0 text-primary">
+            {icon}
           </div>
         )}
         <div className="min-w-0 flex-1">
@@ -40,9 +42,9 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             </h1>
             {badge}
           </div>
-          {description && (
+          {desc && (
             <p className="text-sm sm:text-base text-muted-foreground mt-1 line-clamp-2">
-              {description}
+              {desc}
             </p>
           )}
         </div>
