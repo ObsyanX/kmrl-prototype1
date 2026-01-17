@@ -376,6 +376,51 @@ export type Database = {
           },
         ]
       }
+      daily_induction_plans: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          for_service: Json | null
+          id: string
+          in_maintenance: Json | null
+          on_standby: Json | null
+          optimization_summary: Json | null
+          plan_date: string
+          service_schedule: Json | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          for_service?: Json | null
+          id?: string
+          in_maintenance?: Json | null
+          on_standby?: Json | null
+          optimization_summary?: Json | null
+          plan_date: string
+          service_schedule?: Json | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          for_service?: Json | null
+          id?: string
+          in_maintenance?: Json | null
+          on_standby?: Json | null
+          optimization_summary?: Json | null
+          plan_date?: string
+          service_schedule?: Json | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       decision_conflicts: {
         Row: {
           conflict_type: string
@@ -830,6 +875,92 @@ export type Database = {
         }
         Relationships: []
       }
+      override_decisions: {
+        Row: {
+          ai_suggestion_used: boolean | null
+          context: Json | null
+          created_at: string
+          from_train_id: string
+          id: string
+          outcome_success: boolean | null
+          reason: string
+          timestamp: string
+          to_train_id: string
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          ai_suggestion_used?: boolean | null
+          context?: Json | null
+          created_at?: string
+          from_train_id: string
+          id?: string
+          outcome_success?: boolean | null
+          reason: string
+          timestamp?: string
+          to_train_id: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          ai_suggestion_used?: boolean | null
+          context?: Json | null
+          created_at?: string
+          from_train_id?: string
+          id?: string
+          outcome_success?: boolean | null
+          reason?: string
+          timestamp?: string
+          to_train_id?: string
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: []
+      }
+      parking_assignments: {
+        Row: {
+          assigned_at: string
+          bay_name: string
+          created_at: string
+          id: string
+          plan_date: string
+          position_in_track: number | null
+          shunting_moves_required: number | null
+          track_number: number | null
+          trainset_id: string | null
+        }
+        Insert: {
+          assigned_at?: string
+          bay_name: string
+          created_at?: string
+          id?: string
+          plan_date: string
+          position_in_track?: number | null
+          shunting_moves_required?: number | null
+          track_number?: number | null
+          trainset_id?: string | null
+        }
+        Update: {
+          assigned_at?: string
+          bay_name?: string
+          created_at?: string
+          id?: string
+          plan_date?: string
+          position_in_track?: number | null
+          shunting_moves_required?: number | null
+          track_number?: number | null
+          trainset_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "parking_assignments_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -865,6 +996,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      readiness_scores: {
+        Row: {
+          branding_score: number | null
+          breakdown: Json | null
+          category: string | null
+          cleaning_score: number | null
+          created_at: string
+          fitness_score: number | null
+          id: string
+          job_card_score: number | null
+          mileage_score: number | null
+          score_date: string
+          total_score: number
+          trainset_id: string
+        }
+        Insert: {
+          branding_score?: number | null
+          breakdown?: Json | null
+          category?: string | null
+          cleaning_score?: number | null
+          created_at?: string
+          fitness_score?: number | null
+          id?: string
+          job_card_score?: number | null
+          mileage_score?: number | null
+          score_date: string
+          total_score: number
+          trainset_id: string
+        }
+        Update: {
+          branding_score?: number | null
+          breakdown?: Json | null
+          category?: string | null
+          cleaning_score?: number | null
+          created_at?: string
+          fitness_score?: number | null
+          id?: string
+          job_card_score?: number | null
+          mileage_score?: number | null
+          score_date?: string
+          total_score?: number
+          trainset_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "readiness_scores_trainset_id_fkey"
+            columns: ["trainset_id"]
+            isOneToOne: false
+            referencedRelation: "trainsets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       simulation_scenarios: {
         Row: {
