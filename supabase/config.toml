@@ -30,6 +30,9 @@ verify_jwt = false
 [functions.hierarchical-optimizer]
 verify_jwt = false
 
+[functions.layer2-scheduler]
+verify_jwt = false
+
 [functions.ml-predictor]
 verify_jwt = false
 
@@ -37,6 +40,9 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.optimization-engine]
+verify_jwt = false
+
+[functions.override-learner]
 verify_jwt = false
 
 [functions.pattern-learner]
@@ -55,4 +61,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.weather-predictor]
+verify_jwt = false
+
+[functions.what-if-analyzer]
 verify_jwt = false
