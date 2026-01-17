@@ -1,0 +1,129 @@
+{
+  "app": {
+    "name": "MetroMind",
+    "tagline": "AI-Powered Metro Operations"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "inductionPlan": "Induction Plan",
+    "fleetStatus": "Fleet Status",
+    "simulator": "Simulator",
+    "maintenance": "Maintenance",
+    "reports": "Reports",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "dashboard": {
+    "title": "Operations Dashboard",
+    "totalTrains": "Total Trains",
+    "operational": "Operational",
+    "inMaintenance": "In Maintenance",
+    "standby": "Standby",
+    "aiConfidence": "AI Confidence",
+    "readinessScore": "Readiness Score",
+    "lastUpdated": "Last Updated"
+  },
+  "induction": {
+    "title": "AI-Driven Induction Plan",
+    "subtitle": "Intelligent scheduling for train induction operations",
+    "generatePlan": "Generate Plan",
+    "regeneratePlan": "Regenerate Plan",
+    "approvePlan": "Approve Plan",
+    "overridePlan": "Override Plan",
+    "downloadCSV": "Download CSV",
+    "downloadPDF": "Download PDF",
+    "status": {
+      "ready": "Ready",
+      "blocked": "Blocked",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "priority": {
+      "critical": "Critical",
+      "high": "High",
+      "normal": "Normal",
+      "low": "Low"
+    }
+  },
+  "fleet": {
+    "title": "Fleet Status",
+    "trainId": "Train ID",
+    "status": "Status",
+    "readiness": "Readiness",
+    "location": "Location",
+    "batteryLevel": "Battery Level",
+    "lastService": "Last Service"
+  },
+  "simulator": {
+    "title": "What-If Simulator",
+    "subtitle": "Test different scenarios and analyze impacts",
+    "runSimulation": "Run Simulation",
+    "scheduledTrain": "Scheduled Train",
+    "standbyTrain": "Standby Train",
+    "swapReason": "Swap Reason",
+    "analyzeSwap": "Analyze Swap",
+    "executeSwap": "Execute Swap",
+    "recommendation": {
+      "accepted": "Accepted",
+      "feasible": "Feasible",
+      "reviewRequired": "Review Required",
+      "rejected": "Rejected"
+    }
+  },
+  "readiness": {
+    "title": "Readiness Score",
+    "fitness": "Fitness Certificates",
+    "jobCards": "Job Cards",
+    "branding": "Branding/SLA",
+    "mileage": "Mileage Balance",
+    "cleaning": "Cleaning Status",
+    "category": {
+      "service": "For Service",
+      "standby": "Standby",
+      "maintenance": "In Maintenance",
+      "ibl": "IBL (Involuntary Block)"
+    }
+  },
+  "schedule": {
+    "title": "Service Schedule",
+    "slot": "Slot",
+    "time": "Time",
+    "train": "Train",
+    "rationale": "Rationale",
+    "shuntingMoves": "Shunting Moves",
+    "regularDay": "Regular Day (10 slots)",
+    "holiday": "Holiday (15 slots)"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import",
+    "refresh": "Refresh",
+    "noData": "No data available",
+    "actions": "Actions"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "signUp": "Sign Up"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "network": "Network error. Please check your connection.",
+    "unauthorized": "You are not authorized to perform this action.",
+    "notFound": "The requested resource was not found."
+  }
+}
