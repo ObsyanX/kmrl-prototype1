@@ -32,6 +32,7 @@ import Support from "./pages/Support";
 import AuditTrail from "./pages/AuditTrail";
 import Incidents from "./pages/Incidents";
 import AccuracyDashboard from "./pages/AccuracyDashboard";
+import RotationSchedule from "./pages/RotationSchedule";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -107,6 +108,7 @@ const App = () => {
                 <Route path="/audit-trail" element={<AuditTrail />} />
                 <Route path="/incidents" element={<Incidents />} />
                 <Route path="/accuracy-dashboard" element={<AccuracyDashboard />} />
+                <Route path="/rotation-schedule" element={<RotationSchedule />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </main>

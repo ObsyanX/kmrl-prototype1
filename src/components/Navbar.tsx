@@ -18,8 +18,10 @@ import {
   FileText,
   Cog,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  RotateCw
 } from 'lucide-react';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -41,6 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ userRole, onLogout }) => {
       items: [
         { name: "Dashboard", path: "/", icon: BarChart3, roles: ['operator', 'manager', 'admin', 'analyst', 'supervisor'] },
         { name: "Induction Plan", path: "/induction-plan", icon: Calendar, roles: ['operator', 'manager', 'admin', 'supervisor'] },
+        { name: "Rotation Schedule", path: "/rotation-schedule", icon: RotateCw, roles: ['operator', 'manager', 'admin', 'analyst', 'supervisor'] },
         { name: "Simulator", path: "/simulator", icon: Brain, roles: ['operator', 'manager', 'admin', 'analyst', 'supervisor'] },
         { name: "Fleet Status", path: "/fleet-status", icon: Train, roles: ['operator', 'manager', 'admin', 'analyst', 'supervisor'] },
       ]
@@ -170,6 +173,9 @@ const Navbar: React.FC<NavbarProps> = ({ userRole, onLogout }) => {
               />
             </div>
 
+            {/* Language Switcher */}
+            <LanguageSwitcher variant="compact" className="hidden sm:flex" />
+
             {/* Notifications */}
             <Button variant="ghost" size="icon" className="relative h-9 w-9">
               <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -216,6 +222,12 @@ const Navbar: React.FC<NavbarProps> = ({ userRole, onLogout }) => {
                 placeholder="Search platform..."
                 className="w-full pl-10 glass-card border-primary/20"
               />
+            </div>
+
+            {/* Mobile Language Switcher */}
+            <div className="flex items-center justify-between sm:hidden py-2">
+              <span className="text-sm text-muted-foreground">Language</span>
+              <LanguageSwitcher />
             </div>
 
             {navigationGroups.map((group) => {
