@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Brain, Calendar, Clock, Train, Users, CheckCircle, AlertTriangle, Zap, Loader2, Sparkles, Download } from 'lucide-react';
+import { Brain, Calendar, Clock, Train, Users, CheckCircle, AlertTriangle, Zap, Loader2, Sparkles, Download, PlayCircle, LayoutGrid } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,19 +7,54 @@ import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
 import { useOptimization } from '@/hooks/useOptimization';
 import { useAdvancedOptimization } from '@/hooks/useAdvancedOptimization';
 import { useTrainsets } from '@/hooks/useTrainsets';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+
+interface SlotAssignment {
+  slot: number;
+  departureTime: string;
+  trainId: string;
+  trainName: string;
+  readinessScore: number;
+  shuntingMoves: number;
+  objectiveScore: number;
+  rationale: string;
+}
+
+interface ScheduleResult {
+  planDate: string;
+  scheduleType: 'regular' | 'holiday';
+  totalSlots: number;
+  assignments: SlotAssignment[];
+  unassignedTrains: string[];
+  optimizationMetrics: {
+    totalObjective: number;
+    averageReadiness: number;
+    totalShuntingMoves: number;
+    executionTimeMs: number;
+  };
+}
 
 const InductionPlan: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('layer1');
   const [isGenerating, setIsGenerating] = useState(false);
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [dataSourcesStatus, setDataSourcesStatus] = useState<any>({});
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [selectedRecommendation, setSelectedRecommendation] = useState<any>(null);
   const [operationalNotes, setOperationalNotes] = useState('');
+  
+  // Layer 2 Scheduling State
+  const [planDate, setPlanDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+  const [isHoliday, setIsHoliday] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [serviceSchedule, setServiceSchedule] = useState<ScheduleResult | null>(null);
   
   const { trainsets, loading: trainsetsLoading } = useTrainsets();
   const { planInduction, getAIRecommendation } = useOptimization();
@@ -203,6 +238,29 @@ const InductionPlan: React.FC = () => {
     toast.info(`Override requested for ${recommendation.id} - Manual planning mode activated`);
   };
 
+  // Layer 2 Service Scheduling
+  const handleGenerateServiceSchedule = async () => {
+    setIsScheduling(true);
+    try {
+      const response = await supabase.functions.invoke('layer2-scheduler', {
+        body: {
+          planDate,
+          isHoliday
+        }
+      });
+
+      if (response.error) throw response.error;
+
+      setServiceSchedule(response.data as ScheduleResult);
+      toast.success(`Service schedule generated: ${response.data.assignments?.length || 0} trains assigned`);
+    } catch (error) {
+      console.error('Scheduling error:', error);
+      toast.error('Failed to generate service schedule');
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
   const downloadInductionPlanCSV = () => {
     if (recommendations.length === 0) {
       toast.error('No induction plans to download');
@@ -332,55 +390,65 @@ const InductionPlan: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-cockpit p-6 space-y-6">
       
-      {/* Header */}
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-glow mb-2">AI-Driven Induction Plan</h1>
-          <p className="text-muted-foreground">
-            Intelligent scheduling for tonight's train induction operations
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-4 flex-wrap">
-          <Badge variant="outline" className="glass-card border-primary text-primary">
-            <Brain className="w-3 h-3 mr-1" />
-            AI Model v2.1.0 (Gemini Flash)
-          </Badge>
-          <Button 
-            variant="outline"
-            onClick={downloadInductionPlanCSV}
-            disabled={recommendations.length === 0}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download CSV
-          </Button>
-          <Button 
-            variant="outline"
-            onClick={downloadInductionPlanPDF}
-            disabled={recommendations.length === 0}
-          >
-            <Download className="w-4 h-4 mr-2" />
-            Download Report
-          </Button>
-          <Button 
-            variant="neural" 
-            onClick={handleGeneratePlan}
-            disabled={isGenerating || trainsetsLoading}
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating AI Plan...
-              </>
-            ) : (
-              <>
-                <Brain className="w-4 h-4 mr-2" />
-                Regenerate Plan
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
+      {/* Tabs for Layer 1 and Layer 2 */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="glass-card mb-6">
+          <TabsTrigger value="layer1" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            Layer 1: Train Readiness
+          </TabsTrigger>
+          <TabsTrigger value="layer2" className="flex items-center gap-2">
+            <LayoutGrid className="w-4 h-4" />
+            Layer 2: Service Schedule
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Layer 1: Train Readiness */}
+        <TabsContent value="layer1">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-glow">Train Readiness Assessment</h2>
+              <p className="text-muted-foreground text-sm">
+                AI-powered analysis of train fitness for service
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4 flex-wrap">
+              <Button 
+                variant="outline"
+                onClick={downloadInductionPlanCSV}
+                disabled={recommendations.length === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download CSV
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={downloadInductionPlanPDF}
+                disabled={recommendations.length === 0}
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download Report
+              </Button>
+              <Button 
+                variant="neural" 
+                onClick={handleGeneratePlan}
+                disabled={isGenerating || trainsetsLoading}
+              >
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Brain className="w-4 h-4 mr-2" />
+                    Regenerate Plan
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
 
       {/* Plan Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -560,6 +628,236 @@ const InductionPlan: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+        </TabsContent>
+
+        {/* Layer 2: Service Schedule */}
+        <TabsContent value="layer2">
+          <div className="space-y-6">
+            {/* Schedule Controls */}
+            <Card className="glass-card border-primary/20">
+              <CardHeader>
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-glow flex items-center gap-2">
+                      <PlayCircle className="w-5 h-5" />
+                      Layer 2: Service Schedule Optimization
+                    </CardTitle>
+                    <CardDescription>
+                      CP-SAT style optimization for departure slot assignment
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="plan-date" className="text-sm">Date:</Label>
+                      <input
+                        id="plan-date"
+                        type="date"
+                        value={planDate}
+                        onChange={(e) => setPlanDate(e.target.value)}
+                        className="px-3 py-2 rounded-lg bg-card border border-primary/20 text-foreground text-sm"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Switch 
+                        id="holiday-mode" 
+                        checked={isHoliday} 
+                        onCheckedChange={setIsHoliday} 
+                      />
+                      <Label htmlFor="holiday-mode" className="text-sm">
+                        Holiday Mode (15 slots)
+                      </Label>
+                    </div>
+                    <Button 
+                      variant="neural" 
+                      onClick={handleGenerateServiceSchedule}
+                      disabled={isScheduling}
+                    >
+                      {isScheduling ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Optimizing...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-4 h-4 mr-2" />
+                          Generate Schedule
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+
+            {/* Schedule Results */}
+            {serviceSchedule ? (
+              <>
+                {/* Optimization Metrics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="glass-card border-primary/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-3">
+                        <Train className="w-8 h-8 text-primary" />
+                        <div>
+                          <p className="text-2xl font-bold text-glow">{serviceSchedule.assignments.length}</p>
+                          <p className="text-xs text-muted-foreground">Trains Assigned</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="glass-card border-primary/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-3">
+                        <Zap className="w-8 h-8 text-success" />
+                        <div>
+                          <p className="text-2xl font-bold text-success">
+                            {serviceSchedule.optimizationMetrics.averageReadiness.toFixed(1)}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Avg Readiness</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="glass-card border-primary/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="w-8 h-8 text-warning" />
+                        <div>
+                          <p className="text-2xl font-bold text-warning">
+                            {serviceSchedule.optimizationMetrics.totalShuntingMoves}
+                          </p>
+                          <p className="text-xs text-muted-foreground">Shunting Moves</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="glass-card border-primary/20">
+                    <CardContent className="pt-4">
+                      <div className="flex items-center gap-3">
+                        <Clock className="w-8 h-8 text-primary" />
+                        <div>
+                          <p className="text-2xl font-bold text-primary">
+                            {serviceSchedule.optimizationMetrics.executionTimeMs}ms
+                          </p>
+                          <p className="text-xs text-muted-foreground">Execution Time</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Departure Slots Gantt-style View */}
+                <Card className="glass-card border-primary/20">
+                  <CardHeader>
+                    <CardTitle className="text-glow">Departure Slot Assignments</CardTitle>
+                    <CardDescription>
+                      {serviceSchedule.scheduleType === 'holiday' ? '15 slots (Holiday)' : '10 slots (Regular)'} • {serviceSchedule.planDate}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {serviceSchedule.assignments.map((assignment) => (
+                        <div 
+                          key={assignment.slot}
+                          className="flex items-center gap-4 p-4 rounded-lg bg-card border border-primary/10 hover:border-primary/30 transition-colors"
+                        >
+                          {/* Slot Number */}
+                          <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
+                            <span className="text-lg font-bold text-primary">{assignment.slot}</span>
+                          </div>
+
+                          {/* Time */}
+                          <div className="w-20 shrink-0">
+                            <p className="text-lg font-bold">{assignment.departureTime}</p>
+                            <p className="text-xs text-muted-foreground">Departure</p>
+                          </div>
+
+                          {/* Train Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <Train className="w-4 h-4 text-primary shrink-0" />
+                              <p className="font-medium truncate">{assignment.trainId}</p>
+                              <Badge variant="outline" className="shrink-0">
+                                {assignment.trainName}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground mt-1 truncate">
+                              {assignment.rationale}
+                            </p>
+                          </div>
+
+                          {/* Metrics */}
+                          <div className="flex items-center gap-4 shrink-0">
+                            <div className="text-center">
+                              <p className="text-lg font-bold text-success">{assignment.readinessScore}</p>
+                              <p className="text-xs text-muted-foreground">Readiness</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-lg font-bold text-warning">{assignment.shuntingMoves}</p>
+                              <p className="text-xs text-muted-foreground">Shunts</p>
+                            </div>
+                            <div className="text-center">
+                              <p className="text-lg font-bold text-primary">{(assignment.objectiveScore / 1000).toFixed(1)}k</p>
+                              <p className="text-xs text-muted-foreground">Score</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Unassigned Trains */}
+                    {serviceSchedule.unassignedTrains.length > 0 && (
+                      <div className="mt-6 p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                        <div className="flex items-center gap-2 mb-2">
+                          <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                          <span className="font-medium text-yellow-400">
+                            {serviceSchedule.unassignedTrains.length} trains not assigned (excess capacity)
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {serviceSchedule.unassignedTrains.map((trainId) => (
+                            <Badge key={trainId} variant="outline" className="text-muted-foreground">
+                              {trainId}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Actions */}
+                <div className="flex gap-4">
+                  <Button variant="success" className="flex-1">
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Approve Schedule
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Download className="w-4 h-4 mr-2" />
+                    Export Schedule
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <Card className="glass-card border-primary/20">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <LayoutGrid className="w-16 h-16 text-muted-foreground mb-4 opacity-50" />
+                  <p className="text-lg font-medium text-muted-foreground mb-2">
+                    No service schedule generated
+                  </p>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select a date and click "Generate Schedule" to create optimized slot assignments
+                  </p>
+                  <Button variant="neural" onClick={handleGenerateServiceSchedule}>
+                    <Zap className="w-4 h-4 mr-2" />
+                    Generate Schedule
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* System Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
